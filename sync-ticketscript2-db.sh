@@ -21,8 +21,11 @@ if [ "$?" -gt 0 ]; then
 	exit 1
 fi
 
+# Apply MySQL tweaks
+mysql -h $HOST ticketscript2 < ./acceptance-tweaks.sql
+
 # Offset AUTOINCREMENT columns
-./set-autoincrement.sh $DATABASE $OFFSET
+./set-autoincrement.sh $DATABASE $HOST $OFFSET
 
 # Restore user data in ts2acceptance database
 mysql -h $HOST $DATABASE <$USERDATA_SQL_FILE

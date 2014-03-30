@@ -3,6 +3,8 @@ INSTANCE="$1"
 INSTANCE_PARAM_GROUP="ts2-default"
 INSTANCE_SUBNET_GROUP="ts2acceptance"
 INSTANCE_CLASS="db.m1.large"
+INSTANCE_VPC_SECURITY_GROUPS="sg-e6fc1283"
+INSTANCE_AVAILABILITY_ZONE="eu-west-1a"
 
 SNAPSHOT="dbs3-latest"
 
@@ -95,10 +97,6 @@ do_create_latest_snapshot() {
 		"creating" )
 			;;
 
-		"available" )
-			# Snapshot is already underway, nothing to do but wait then
-			;;
-
 		"invalid" )
 			echo
 			echo 'ERROR - failed to get snapshot status from $snapshot_info' >&2
@@ -138,6 +136,9 @@ case "$instance_status" in
 
 	"DBInstanceNotFound")
 
+		echo
+		echo "Creating new instance from dbs3 snapshot"
+
 		# Create snapshot
 		do_create_latest_snapshot
 
@@ -146,23 +147,25 @@ case "$instance_status" in
 		  --db-snapshot-identifier "$SNAPSHOT" \
 		  --db-instance-identifier "$INSTANCE" \
 		  --db-instance-class "$INSTANCE_CLASS" \
-		  --db-subnet-group-name "$INSTANCE_SUBNET_GROUP"
+		  --db-subnet-group-name "$INSTANCE_SUBNET_GROUP" \
+		  --availability-zone "$INSTANCE_AVAILABILITY_ZONE"
 
 		rds_get_instance_status
+
+		echo -n "Instance $INSTANCE status: $instance_status"
 		;;
 
 	"available")
 		echo
-		echo "WARNING - Instance $INSTANCE is already available, nothing to do!" >&2
-		exit 1
+		echo "WARNING - Instance $INSTANCE is already available" >&2
 		;;
 
 	"creating")
-		# DB Instance is already being created
+		# DB Instance is already being createdd
 		;;
 
 	"modifying")
-		# DB Instance is being modified - just wait
+		# DB Instance is already being modified
 		;;
 
 	*)
@@ -173,7 +176,8 @@ case "$instance_status" in
 esac
 
 # Wait for instance to complete
-while [ "$instance_status" == "creating" ]; do
+INSTANCE_WAIT_STATE="creating|modifying"
+while [[ "$instance_status" =~ $INSTANCE_WAIT_STATE ]]; do
 	echo -n "."
 	rds_get_instance_status
 	sleep 25
@@ -183,14 +187,17 @@ echo
 
 # Verify and modify DB instance parameter group
 if [ "$instance_paramgroup" != "$INSTANCE_PARAM_GROUP" ]; then
-	echo "$instance_paramgroup != $INSTANCE_PARAM_GROUP"
-	exit
+
+	echo -n "Modifying DB instance $INSTANCE"
+
 	# Migrate acceptance database params and database instance type
 	rds-modify-db-instance \
 	  --db-instance-identifier "$INSTANCE" \
 	  --db-parameter-group-name "$INSTANCE_PARAM_GROUP" \
-	  --db-security-groups "default,ts2acceptance" \
+	  --vpc-security-group-ids "$INSTANCE_VPC_SECURITY_GROUPS" \
 	  --apply-immediately true
+
+	echo " done!"
 fi
 
 # Clean exit!

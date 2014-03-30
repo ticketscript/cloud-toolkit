@@ -1,5 +1,5 @@
 #!/bin/sh
-DATABASE="ts2acceptance"
+DATABASE="ticketscript2"
 INSTANCE="ts2acceptance"
 OFFSET="2000000000"
 USERDATA_SQL_FILE="temp.sql"
@@ -24,4 +24,4 @@ fi
 ./set-autoincrement.sh $DATABASE $OFFSET
 
 # Restore user data in ts2acceptance database
-mysql $DATABASE < $USERDATA_SQL_FILE
+mysql $DATABASE <$USERDATA_SQL_FILE

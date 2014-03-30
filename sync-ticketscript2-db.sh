@@ -1,5 +1,6 @@
 #!/bin/sh
 DATABASE="ts2acceptance"
+INSTANCE="ts2acceptance"
 OFFSET="2000000000"
 USERDATA_SQL_FILE="temp.sql"
 
@@ -7,7 +8,7 @@ USERDATA_SQL_FILE="temp.sql"
 ./backup-user-data.sh $DATABASE $OFFSET 1> $USERDATA_SQL_FILE
 
 # Restore acceptance database from snapshot
-./restore-db-from-slave.sh $DATABASE
+./restore-db-from-slave.sh $INSTANCE
 
 # Offset AUTOINCREMENT columns
 ./set-autoincrement.sh $DATABASE $OFFSET

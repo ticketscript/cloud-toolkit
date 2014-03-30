@@ -1,11 +1,12 @@
 #!/bin/sh
 DATABASE="ticketscript2"
 INSTANCE="ts2acceptance"
+HOST="ts2acceptance.chw1qgpdiota.eu-west-1.rds.amazonaws.com"
 OFFSET="2000000000"
 USERDATA_SQL_FILE="temp.sql"
 
 # Backup user data in ts2acceptance database first
-./backup-user-data.sh $DATABASE $OFFSET 1>$USERDATA_SQL_FILE
+./backup-user-data.sh $DATABASE $HOST $OFFSET 1>$USERDATA_SQL_FILE
 
 if [ "$?" -gt 0 ]; then 
 	echo "ERROR - Backup user data failed!" >&2
@@ -24,4 +25,4 @@ fi
 ./set-autoincrement.sh $DATABASE $OFFSET
 
 # Restore user data in ts2acceptance database
-mysql $DATABASE <$USERDATA_SQL_FILE
+mysql -h $HOST $DATABASE <$USERDATA_SQL_FILE

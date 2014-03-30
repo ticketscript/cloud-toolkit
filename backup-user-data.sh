@@ -1,7 +1,8 @@
 #!/bin/sh
 DATABASE="$1"
-OFFSET="$2"
+HOST="$2"
+OFFSET="$3"
 
 while read table key ; do 
-  mysqldump -d --where="$key >= $OFFSET" $DATABASE $table
+  mysqldump -h $HOST -d --where="$key >= $OFFSET" $DATABASE $table
 done < table-list

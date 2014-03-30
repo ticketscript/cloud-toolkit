@@ -189,6 +189,7 @@ if [ "$instance_paramgroup" != "$INSTANCE_PARAM_GROUP" ]; then
 	rds-modify-db-instance \
 	  --db-instance-identifier "$INSTANCE" \
 	  --db-parameter-group-name "$INSTANCE_PARAM_GROUP" \
+	  --db-security-groups "default,ts2acceptance" \
 	  --apply-immediately true
 fi
 

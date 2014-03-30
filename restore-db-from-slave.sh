@@ -11,6 +11,8 @@ rds_get_snapshot_status() {
 	# Get snapshot status from info
 	if [[ $snapshot_info =~ "<Status>([a-z]+)</Status>" ]]; then
 		snapshot_status="${BASH_REMATCH[1]}"
+	else if [[ $snapshot_info =~ "<Code>(a-zA-Z]+</Code>" ]];
+		snapshot_status="${BASH_REMATCH[1]}"
 	else
 		echo 'ERROR - failed to get snapshot status from '
 		echo $snapshot_info
@@ -27,15 +29,31 @@ rds_get_snapshot_status() {
 	return $snapshot_status
 }
 
-# Create RDS snapshot from DBS3
-rds-create-db-snapshot -i dbs3 -s "$SNAPSHOT"
+rds_create_snapshot() {
+	# Create RDS snapshot from DBS3
+	rds-create-db-snapshot -i dbs3 -s "$SNAPSHOT"
+}
 
-# Restore acceptance database from snapshot
-rds-restore-db-instance-from-snapshot "$INSTANCE" -s "$SNAPSHOT"
+# Check snapshot status
+case rds_get_snapshot_status() in
 
+	DBSnapshotNotFound )
+		# No snapshot found, so create one
+		rds_create_snapshot()
+		;;
+	creating )
+		# Snapshot is already underway, nothing to do but wait then
+		;;
+
+esac
+
+# Wait for snapshot to complete
 while [ rds_get_snapshot_status() == 'creating' ]; do
 	sleep 10
 done
+
+# Restore acceptance database from snapshot
+rds-restore-db-instance-from-db-snapshot "$INSTANCE" -s "$SNAPSHOT"
 
 # Migrate acceptance database params and database instance type
 rds-modify-db-instance --db-instance-identifier "$INSTANCE" --db-instance-class db.m1.large --db-parameter-group-name ts2-default --apply-immediately true

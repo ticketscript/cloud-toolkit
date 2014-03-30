@@ -1,9 +1,42 @@
 #!/bin/bash
 INSTANCE="$1"
+INSTANCE_PARAM_GROUP="ts2-default"
+INSTANCE_SUBNET_GROUP="ts2acceptance"
+INSTANCE_CLASS="db.m1.large"
+
 SNAPSHOT="dbs3-latest"
+
 REGEX_STATUS="<Status>(.*)</Status>"
+REGEX_INSTANCE_STATUS="<DBInstanceStatus>(.*)</DBInstanceStatus>"
 REGEX_CODE="<Code>(.*)</Code>"
 REGEX_PROGRESS="<PercentProgress>([0-9]+)</PercentProgress>"
+REGEX_INSTANCE_PARAMGROUP="<DBParameterGroupName>(.*)</DBParameterGroupName>"
+
+
+
+#
+# Common RDS functions
+#
+
+rds_get_instance_status() {
+
+	# Retrieve instance info
+	instance_info=`rds-describe-db-instances --db-instance-identifier "$INSTANCE" --show-xml`
+
+	# Get instance status from info
+	if [[ "$instance_info" =~ $REGEX_INSTANCE_STATUS ]]; then
+		instance_status="${BASH_REMATCH[1]}"
+	elif [[ "$instance_info" =~ $REGEX_CODE ]]; then
+		instance_status="${BASH_REMATCH[1]}"
+	else
+		instance_status="invalid"
+	fi
+
+	# Get instance parameter group
+	if [[ "$instance_info" =~ $REGEX_INSTANCE_PARAMGROUP ]]; then
+		instance_paramgroup="${BASH_REMATCH[1]}"
+	fi
+}
 
 rds_get_snapshot_status() {
 
@@ -34,63 +67,130 @@ rds_remove_snapshot() {
 	rds-delete-db-snapshot	--db-snapshot-identifier "$SNAPSHOT" -f
 }
 
-# Check snapshot status
-rds_get_snapshot_status
+#
+# Check and create slave snapshot
+#
 
-echo -n "Snapshot $SNAPSHOT status: $snapshot_status"
-case $snapshot_status in
+do_create_latest_snapshot() {
+	# Check snapshot status
+	rds_get_snapshot_status
 
-	availablie2 )
-		# Remove Existing snapshot
-		rds_remove_snapshot
-		# Create new snapshot
-		rds_create_snapshot
+	echo -n "Snapshot $SNAPSHOT status: $snapshot_status"
+	case $snapshot_status in
+
+		"available" )
+			# Remove Existing snapshot
+			rds_remove_snapshot
+			# Create new snapshot
+			rds_create_snapshot
+			rds_get_snapshot_status
+			;;
+
+		"DBSnapshotNotFound" )
+			# No snapshot found, so create one
+			rds_create_snapshot
+			rds_get_snapshot_status
+			;;
+
+		"creating" )
+			;;
+
+		"available" )
+			# Snapshot is already underway, nothing to do but wait then
+			;;
+
+		"invalid" )
+			echo
+			echo 'ERROR - failed to get snapshot status from $snapshot_info' >&2
+			exit 1
+			;;
+
+		* )
+			echo
+			echo "ERROR - unknown snapshot status: $snapshot_status" >&2
+			exit 1
+			;;
+
+	esac
+
+	# Wait for snapshot to complete
+	while [ "$snapshot_status" == "creating" ]; do
+		echo -n " $snapshot_progress%"
 		rds_get_snapshot_status
+		sleep 25
+	done
+
+	echo
+}
+
+
+
+#
+# Create database instance
+#
+
+# Check instance status
+rds_get_instance_status
+
+echo -n "Instance $INSTANCE status: $instance_status"
+
+case "$instance_status" in
+
+	"DBInstanceNotFound")
+
+		# Create snapshot
+		do_create_latest_snapshot
+
+		# Restore acceptance database from snapshot
+		rds-restore-db-instance-from-db-snapshot \
+		  --db-snapshot-identifier "$SNAPSHOT" \
+		  --db-instance-identifier "$INSTANCE" \
+		  --db-instance-class "$INSTANCE_CLASS" \
+		  --db-subnet-group-name "$INSTANCE_SUBNET_GROUP"
+
+		rds_get_instance_status
 		;;
 
-	 DBSnapshotNotFound )
-		# No snapshot found, so create one
-		rds_create_snapshot
-		rds_get_snapshot_status
-		;;
-
-	creating )
-		;;
-
-	available )
-		# Snapshot is already underway, nothing to do but wait then
-		;;
-
-	invalid )
-		echo 'ERROR - failed to get snapshot status from $snapshot_info'
+	"available")
+		echo
+		echo "WARNING - Instance $INSTANCE is already available, nothing to do!" >&2
 		exit 1
 		;;
 
-	* )
-		echo "ERROR - unknown snapshot status: $snapshot_status"
-		exit 1
+	"creating")
+		# DB Instance is already being created
 		;;
+
+	"modifying")
+		# DB Instance is being modified - just wait
+		;;
+
+	*)
+		echo
+		echo "ERROR - Unknown instance status: $instance_status" >&2
+		exit 1
 
 esac
 
-# Wait for snapshot to complete
-while [ "$snapshot_status" == "creating" ]; do
-	echo -n " $snapshot_progress%"
-	rds_get_snapshot_status
+# Wait for instance to complete
+while [ "$instance_status" == "creating" ]; do
+	echo -n "."
+	rds_get_instance_status
 	sleep 25
 done
 
 echo
 
-# Restore acceptance database from snapshot
-rds-restore-db-instance-from-db-snapshot \
-  --db-snapshot-identifier "$SNAPSHOT" \
-  --db-instance-identifier "$INSTANCE" \
-  --db-instance-class db.m1.large \
-  --db-subnet-group ts2acceptance
+# Verify and modify DB instance parameter group
+if [ "$instance_paramgroup" != "$INSTANCE_PARAM_GROUP" ]; then
+	echo "$instance_paramgroup != $INSTANCE_PARAM_GROUP"
+	exit
+	# Migrate acceptance database params and database instance type
+	rds-modify-db-instance \
+	  --db-instance-identifier "$INSTANCE" \
+	  --db-parameter-group-name "$INSTANCE_PARAM_GROUP" \
+	  --apply-immediately true
+fi
 
-# Migrate acceptance database params and database instance type
-rds-modify-db-instance \
-  --db-instance-identifier "$INSTANCE" \
-  --db-parameter-group-name "ts2-default" \
-  --apply-immediately true
+# Clean exit!
+exit 0

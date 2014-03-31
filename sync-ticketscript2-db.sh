@@ -1,17 +1,56 @@
-#!/bin/sh
+#!/bin/bash
 DATABASE="ticketscript2"
 INSTANCE="ts2acceptance"
 HOST="ts2acceptance.chw1qgpdiota.eu-west-1.rds.amazonaws.com"
 OFFSET="2000000000"
 USERDATA_SQL_FILE="temp.sql"
 
-# Backup user data in ts2acceptance database first
-./backup-user-data.sh $DATABASE $HOST $OFFSET 1>$USERDATA_SQL_FILE
+#
+# Common RDS functions
+#
 
-if [ "$?" -gt 0 ]; then 
-	echo "ERROR - Backup user data failed!" >&2
-	exit 1
+rds_get_instance_status() {
+
+	# Retrieve instance info
+	instance_info=`rds-describe-db-instances --db-instance-identifier "$INSTANCE" --show-xml`
+
+	# Get instance status from info
+	if [[ "$instance_info" =~ $REGEX_INSTANCE_STATUS ]]; then
+		instance_status="${BASH_REMATCH[1]}"
+	elif [[ "$instance_info" =~ $REGEX_CODE ]]; then
+		instance_status="${BASH_REMATCH[1]}"
+	else
+		instance_status="invalid"
+	fi
+}
+
+# Fetch status
+rds_get_instance_status
+
+if [ "$instance_status" == "available" ]; then
+	# Backup user data in ts2acceptance database first
+	./backup-user-data.sh $DATABASE $HOST $OFFSET 1>$USERDATA_SQL_FILE
+
+	if [ "$?" -gt 0 ]; then 
+		echo "ERROR - Backup user data failed!" >&2
+		exit 1
+	fi
+
+	# Destroy acceptance database
+	./destroy-db-instance.sh  $INSTANCE
+
+	if [ "$?" -gt 0 ]; then
+		echo "ERROR - Failed to destroy database instance $INSTANCE" >&2
+		exit 1
+	fi
 fi
+
+# Wait for instance to complete
+while [[ "$instance_status" == "deleting" ]]; do
+	echo -n "."
+	rds_get_instance_status
+	sleep 25
+done
 
 # Restore acceptance database from snapshot
 ./restore-db-from-slave.sh $INSTANCE
@@ -29,3 +68,6 @@ mysql -h $HOST ticketscript2 < ./acceptance-tweaks.sql
 
 # Restore user data in ts2acceptance database
 mysql -h $HOST $DATABASE <$USERDATA_SQL_FILE
+
+# Clean exit!
+exit 0

@@ -5,29 +5,18 @@ HOST="ts2acceptance.chw1qgpdiota.eu-west-1.rds.amazonaws.com"
 OFFSET="2000000000"
 USERDATA_SQL_FILE="temp.sql"
 
-#
-# Common RDS functions
-#
+# Local directory
+DIR=`dirname $0`
 
-rds_get_instance_status() {
-
-	# Retrieve instance info
-	instance_info=`rds-describe-db-instances --db-instance-identifier "$INSTANCE" --show-xml`
-
-	# Get instance status from info
-	if [[ "$instance_info" =~ $REGEX_INSTANCE_STATUS ]]; then
-		instance_status="${BASH_REMATCH[1]}"
-	elif [[ "$instance_info" =~ $REGEX_CODE ]]; then
-		instance_status="${BASH_REMATCH[1]}"
-	else
-		instance_status="invalid"
-	fi
-}
+# Include common RDS tasks
+$DIR/rds-common.sh
 
 # Fetch status
 rds_get_instance_status
 
+# Check for existing DB instance
 if [ "$instance_status" == "available" ]; then
+	
 	# Backup user data in ts2acceptance database first
 	./backup-user-data.sh $DATABASE $HOST $OFFSET 1>$USERDATA_SQL_FILE
 

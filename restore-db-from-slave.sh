@@ -12,7 +12,7 @@ SNAPSHOT="dbs3-latest"
 DIR=`dirname $0`
 
 # Include common RDS tasks
-$DIR/rds-common.sh
+source $DIR/rds-common.sh
 
 
 #

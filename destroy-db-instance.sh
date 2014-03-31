@@ -4,27 +4,11 @@ INSTANCE="$1"
 REGEX_INSTANCE_STATUS="<DBInstanceStatus>(.*)</DBInstanceStatus>"
 REGEX_CODE="<Code>(.*)</Code>"
 
+# Local directory
+DIR=`dirname $0`
 
-
-#
-# Common RDS functions
-#
-
-rds_get_instance_status() {
-
-	# Retrieve instance info
-	instance_info=`rds-describe-db-instances --db-instance-identifier "$INSTANCE" --show-xml`
-
-	# Get instance status from info
-	if [[ "$instance_info" =~ $REGEX_INSTANCE_STATUS ]]; then
-		instance_status="${BASH_REMATCH[1]}"
-	elif [[ "$instance_info" =~ $REGEX_CODE ]]; then
-		instance_status="${BASH_REMATCH[1]}"
-	else
-		instance_status="invalid"
-	fi
-}
-
+# Include common RDS tasks
+source $DIR/rds-common.sh
 
 
 #
@@ -41,6 +25,10 @@ case "$instance_status" in
 	"available")
 
 		rds-delete-db-instance -f --skip-final-snapshot --db-instance-identifier ts2acceptance
+		rds_get_instance_status
+		;;
+
+	"deleting")
 		;;
 
 	*)
@@ -61,3 +49,4 @@ echo
 
 # Clean exit!
 exit 0
+

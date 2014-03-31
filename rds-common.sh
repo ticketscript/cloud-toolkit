@@ -12,7 +12,7 @@ REGEX_INSTANCE_PARAMGROUP="<DBParameterGroupName>(.*)</DBParameterGroupName>"
 
 rds_get_instance_status() {
 
-	if [ "$INSTANCE" == "" ]; 
+	if [ "$INSTANCE" == "" ]; then
 		echo 'ERROR - rds_get_instance_status: $INSTANCE is empty'
 		exit 1
 	fi
@@ -37,7 +37,7 @@ rds_get_instance_status() {
 
 rds_get_snapshot_status() {
 
-	if [ "$SNAPSHOT" == "" ]; 
+	if [ "$SNAPSHOT" == "" ]; then
 		echo 'ERROR - rds_get_instance_status: $SNAPSHOT is empty'
 		exit 1
 	fi
@@ -62,7 +62,7 @@ rds_get_snapshot_status() {
 
 rds_create_snapshot() {
 
-	if [ "$SNAPSHOT" == "" ]; 
+	if [ "$SNAPSHOT" == "" ]; then
 		echo 'ERROR - rds_get_instance_status: $SNAPSHOT is empty'
 		exit 1
 	fi
@@ -73,7 +73,7 @@ rds_create_snapshot() {
 
 rds_remove_snapshot() {
 
-	if [ "$SNAPSHOT" == "" ]; 
+	if [ "$SNAPSHOT" == "" ]; then
 		echo 'ERROR - rds_get_instance_status: $SNAPSHOT is empty'
 		exit 1
 	fi
@@ -89,7 +89,7 @@ rds_remove_snapshot() {
 
 do_create_snapshot() {
 
-	if [ "$SNAPSHOT" == "" ]; 
+	if [ "$SNAPSHOT" == "" ]; then
 		echo 'ERROR - rds_get_instance_status: $SNAPSHOT is empty'
 		exit 1
 	fi

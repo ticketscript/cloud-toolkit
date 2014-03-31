@@ -9,7 +9,7 @@ USERDATA_SQL_FILE="temp.sql"
 DIR=`dirname $0`
 
 # Include common RDS tasks
-$DIR/rds-common.sh
+source $DIR/rds-common.sh
 
 # Fetch status
 rds_get_instance_status

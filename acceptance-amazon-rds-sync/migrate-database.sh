@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Local directory
-DIR=$(readlink -f $( dirname "$0"))
+DIR=$(dirname "$0")
 
 source $DIR/config
 

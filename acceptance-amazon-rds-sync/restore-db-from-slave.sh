@@ -2,7 +2,7 @@
 INSTANCE="$1"
 
 # Local directory
-DIR=$(readlink -f $( dirname "$0"))
+DIR=$(dirname "$0")
 
 # Include configuration and RDS common functions
 source $DIR/config
@@ -26,7 +26,7 @@ case "$instance_status" in
 		echo "Creating new instance from dbs3 snapshot"
 
 		# Create snapshot
-		do_create_latest_snapshot
+		do_create_snapshot
 
 		# Restore acceptance database from snapshot
 		rds-restore-db-instance-from-db-snapshot \

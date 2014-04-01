@@ -1,15 +1,12 @@
 #!/bin/bash
 
 # Local directory
-DIR=$( dirname $( readlink -f "$0" ) )
+DIR=$(dirname "$0")
 
-echo "$0"
-echo $( readline -f "$0" )
-echo $DIR
 # Include common RDS tasks
 source $DIR/config
 source $DIR/rds-common
-exit
+
 # Fetch status
 rds_get_instance_status
 

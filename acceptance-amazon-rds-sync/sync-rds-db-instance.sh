@@ -36,7 +36,7 @@ case "$instance_status" in
 		fi
 		;;
 
-  "deleting")
+	"deleting")
 
 		# Wait for instance to complete
 		while [[ "$instance_status" == "deleting" ]]; do
@@ -44,6 +44,14 @@ case "$instance_status" in
 			rds_get_instance_status
 			sleep 25
 		done
+		;;
+
+	"creating")
+		# DB Instance is already being createdd
+		;;
+
+	"modifying")
+		# DB Instance is already being modified
 		;;
 
 	*)

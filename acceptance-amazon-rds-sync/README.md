@@ -1,11 +1,43 @@
 Ticketscript Acceptence environment builder
 License:
-Autor: Jay <geoffrey.dekleijn@ticketscript.com>
+Author: Jay <geoffrey.dekleijn@ticketscript.com>
 
 
 ## Description ##
 
+Synchronization toolkit for Amazon RDS Database instances. The synchronization will be from the an RDS SNAPSHOT  to a new
+RDS database INSTANCE. Typically, these scripts are used to 'clone' a database from the production environment to an acceptance
+environment on a nightly basis.
 
+These scripts will take care of the following:
+
+1. Taking a snapshot from the SNAPSHOT instance
+2. Backing up any user-generated data on the target INSTANCE
+3. Destroy the INSTANCE
+4. Create a new target INSTANCE from the SNAPSHOT
+5. Restore any user-generated data to the target INSTANCE
+
+The ability of separating user-generate data from imported data is achieved by bumping all primary keys half way through the
+key space. By default, all primary keys are bumped to 1,000,000,000 (1/4 of 32 bit key space). Though this is a crude mechanism,
+it will allow for easy backup and restore. 
+
+### Configuration
+Copy the 'config.template' file to 'config' and setup the INSTANCE variable. The INSTANCE refers
+to the Amazon RDS instance that will be created. Any DATABASE variabels refer to the database on the RDS instance
+that will be synchronized. The SNAPSHOT and SNAPSHOT_INSTANCE variables refer to the RDS source instance. 
+
+Copy 'post-migration-tweaks.sql.template' to 'post-migration-tweaks.sql', and add any post migration SQL statements that
+may be required.
+
+### Scripts
+sync-rds-db-instance.sh
+
+Runs the full backup-snapshot-destroy-create-restore process for the target INSTANCE
+
+
+restore-db-from-slave.sh <instance>
+
+Creates the target INSTANCE from the specified SNAPSHOT 
 
 ## Requirements ##
 

@@ -1,7 +1,9 @@
-Ticketscript Acceptence environment builder
-License:
-Author: Jay <geoffrey.dekleijn@ticketscript.com>
-
+# Amazon RDS sync tool
+```
+Descrition: Ticketscript Acceptence environment builder
+License:    
+Author:     Jay <geoffrey.dekleijn@ticketscript.nl>
+```
 
 ## Description ##
 
@@ -30,12 +32,12 @@ Copy 'post-migration-tweaks.sql.template' to 'post-migration-tweaks.sql', and ad
 may be required.
 
 ### Scripts
-sync-rds-db-instance.sh
+[sync-rds-db-instance.sh](sync-rds-db-instance.sh)
 
 Runs the full backup-snapshot-destroy-create-restore process for the target INSTANCE
 
 
-restore-db-from-slave.sh <instance>
+[restore-db-from-slave.sh](restore-db-from-slave.sh) <INSTANCE>
 
 Creates the target INSTANCE from the specified SNAPSHOT 
 

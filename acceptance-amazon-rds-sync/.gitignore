@@ -1,3 +1,6 @@
 ec2-api-tools-1.6.13.0
 ec2-api-tools
 temp.sql
+table-list
+config
+acceptance-tweaks.sql

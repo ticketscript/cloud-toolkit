@@ -1,43 +1,60 @@
 #!/bin/bash
 
 # Local directory
-DIR=$(readlink -f $( dirname "$0"))
+DIR=$( dirname $( readlink -f "$0" ) )
 
+echo "$0"
+echo $( readline -f "$0" )
+echo $DIR
 # Include common RDS tasks
 source $DIR/config
 source $DIR/rds-common
-
+exit
 # Fetch status
 rds_get_instance_status
 
-# Check for existing DB instance
-if [ "$instance_status" == "available" ]; then
+# Check DB instance status
+case "$instance_status" in
+
+	"DBInstanceNotFound")
+		# Database instance does not exist
+		;;
+
+	"available")
 	
-	# Backup user data in ts2acceptance database first
-	./backup-user-data.sh $DATABASE_NAME $DATABASE_HOST $DATABASE_OFFSET 1>$DATABASE_USERDATA_SQL_FILE
+		# Backup user data in ts2acceptance database first
+		./backup-user-data.sh $DATABASE_NAME $DATABASE_HOST $DATABASE_OFFSET 1>$DATABASE_USERDATA_SQL_FILE
 
-	if [ "$?" -gt 0 ]; then 
-		echo "ERROR - Backup user data failed!" >&2
+		if [ "$?" -gt 0 ]; then 
+			echo "ERROR - Backup user data failed!" >&2
+			exit 1
+		fi
+
+		# Destroy acceptance database
+		./destroy-db-instance.sh  $INSTANCE
+
+		if [ "$?" -gt 0 ]; then
+			echo "ERROR - Failed to destroy database instance $INSTANCE" >&2
+			exit 1
+		fi
+		;;
+
+  "deleting")
+
+		# Wait for instance to complete
+		while [[ "$instance_status" == "deleting" ]]; do
+			echo -n "."
+			rds_get_instance_status
+			sleep 25
+		done
+		;;
+
+	*)
+		echo
+		echo "ERROR - Unknown instance status: $instance_status" >&2
 		exit 1
-	fi
 
-	# Destroy acceptance database
-	./destroy-db-instance.sh  $INSTANCE
-
-	if [ "$?" -gt 0 ]; then
-		echo "ERROR - Failed to destroy database instance $INSTANCE" >&2
-		exit 1
-	fi
-fi
-
-  deleting)
-	# Wait for instance to complete
-	while [[ "$instance_status" == "deleting" ]]; do
-		echo -n "."
-		rds_get_instance_status
-		sleep 25
-	done
-	;;
+esac
 
 # Restore acceptance database from snapshot
 ./restore-db-from-slave.sh $INSTANCE

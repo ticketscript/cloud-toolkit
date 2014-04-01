@@ -8,7 +8,7 @@ REGEX_CODE="<Code>(.*)</Code>"
 DIR=`dirname $0`
 
 # Include common RDS tasks
-source $DIR/source
+source $DIR/config
 source $DIR/rds-common
 
 
@@ -50,4 +50,3 @@ echo
 
 # Clean exit!
 exit 0
-

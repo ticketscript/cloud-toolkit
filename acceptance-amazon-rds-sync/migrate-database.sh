@@ -15,7 +15,7 @@ do_usage() {
 
 # Check source folder
 if [ ! -d "$DATABASE_MIGRATION_SOURCE_DIR"]; then
-	do_usage()
+	do_usage
 fi
 
 # Check for previously executed SQL files
@@ -26,14 +26,18 @@ fi
 
 for sql_file in `ls -1 $DATABASE_MIGRATION_SOURCE_DIR/*.sql`; do
 
-	if [ ! -f "$DATABASE_MIGRATION_TARGET_DIR/$sql_file"]; then
+	if [ ! -f "$DATABASE_MIGRATION_TARGET_DIR/$sql_file" ]; then
 		# Execute new MySQL file
-		mysql -h $DATABASE_HOST $DATABASE_NAME < $DATABASE_MIGRATION_TARGET_DIR/$sql_file 1>/dev/null
+		mysql -h $DATABASE_HOST $DATABASE_NAME < $DATABASE_MIGRATION_SOURCE_DIR/$sql_file 1>/dev/null
 
 		if [ $? -gt 0 ]; then
 			echo "ERROR - Failed to execute $sql_file!" >&2
 			exit 1
 		fi
+
+		# Copy migration file to 'executed' SQL migration file directory
+		cp $DATABASE_MIGRATION_SOURCE_DIR/$sql_file $DATABASE_MIGRATION_TARGET_DIR/
+		
 	else
 
 		# Compare SQL file

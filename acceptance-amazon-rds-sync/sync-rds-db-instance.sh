@@ -30,12 +30,14 @@ if [ "$instance_status" == "available" ]; then
 	fi
 fi
 
-# Wait for instance to complete
-while [[ "$instance_status" == "deleting" ]]; do
-	echo -n "."
-	rds_get_instance_status
-	sleep 25
-done
+  deleting)
+	# Wait for instance to complete
+	while [[ "$instance_status" == "deleting" ]]; do
+		echo -n "."
+		rds_get_instance_status
+		sleep 25
+	done
+	;;
 
 # Restore acceptance database from snapshot
 ./restore-db-from-slave.sh $INSTANCE

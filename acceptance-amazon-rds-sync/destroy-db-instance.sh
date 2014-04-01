@@ -1,11 +1,8 @@
 #!/bin/bash
 INSTANCE="$1"
 
-REGEX_INSTANCE_STATUS="<DBInstanceStatus>(.*)</DBInstanceStatus>"
-REGEX_CODE="<Code>(.*)</Code>"
-
 # Local directory
-DIR=`dirname $0`
+DIR=$(readlink -f $( dirname "$0"))
 
 # Include common RDS tasks
 source $DIR/config

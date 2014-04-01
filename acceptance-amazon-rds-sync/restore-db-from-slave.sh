@@ -2,7 +2,7 @@
 INSTANCE="$1"
 
 # Local directory
-DIR=`dirname $0`
+DIR=$(readlink -f $( dirname "$0"))
 
 # Include configuration and RDS common functions
 source $DIR/config

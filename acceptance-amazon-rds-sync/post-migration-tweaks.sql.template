@@ -1,0 +1,4 @@
+
+-- PLACE any SQL statements required after the database migration here
+-- Truncate tables that do not need to be on the cloned host,
+-- grant access rights etc.

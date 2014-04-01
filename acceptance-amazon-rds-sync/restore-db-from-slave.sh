@@ -1,18 +1,12 @@
 #!/bin/bash
 INSTANCE="$1"
-INSTANCE_PARAM_GROUP="ts2-default"
-INSTANCE_SUBNET_GROUP="ts2acceptance"
-INSTANCE_CLASS="db.m1.large"
-INSTANCE_VPC_SECURITY_GROUPS="sg-e6fc1283"
-INSTANCE_AVAILABILITY_ZONE="eu-west-1a"
-
-SNAPSHOT="dbs3-latest"
 
 # Local directory
 DIR=`dirname $0`
 
-# Include common RDS tasks
-source $DIR/rds-common.sh
+# Include configuration and RDS common functions
+source $DIR/config
+source $DIR/rds-common
 
 
 #

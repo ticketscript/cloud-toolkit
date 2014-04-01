@@ -1,15 +1,11 @@
 #!/bin/bash
-DATABASE="ticketscript2"
-INSTANCE="ts2acceptance"
-HOST="ts2acceptance.chw1qgpdiota.eu-west-1.rds.amazonaws.com"
-OFFSET="2000000000"
-USERDATA_SQL_FILE="temp.sql"
 
 # Local directory
 DIR=`dirname $0`
 
 # Include common RDS tasks
-source $DIR/rds-common.sh
+source $DIR/config
+source $DIR/rds-common
 
 # Fetch status
 rds_get_instance_status
@@ -18,7 +14,7 @@ rds_get_instance_status
 if [ "$instance_status" == "available" ]; then
 	
 	# Backup user data in ts2acceptance database first
-	./backup-user-data.sh $DATABASE $HOST $OFFSET 1>$USERDATA_SQL_FILE
+	./backup-user-data.sh $DATABASE_NAME $DATABASE_HOST $DATABASE_OFFSET 1>$DATABASE_USERDATA_SQL_FILE
 
 	if [ "$?" -gt 0 ]; then 
 		echo "ERROR - Backup user data failed!" >&2
@@ -50,13 +46,13 @@ if [ "$?" -gt 0 ]; then
 fi
 
 # Apply MySQL tweaks
-mysql -h $HOST ticketscript2 < ./acceptance-tweaks.sql
+mysql -h $DATABASE_HOST $DATABASE_NAME < $DIR/post-migration-tweaks.sql 1>/dev/null
 
 # Offset AUTOINCREMENT columns
-./set-autoincrement.sh $DATABASE $HOST $OFFSET
+./set-autoincrement.sh $DATABASE_NAME $DATABASE_HOST $DATABASE_OFFSET
 
 # Restore user data in ts2acceptance database
-mysql -h $HOST $DATABASE <$USERDATA_SQL_FILE
+mysql -h $DATABASE_HOST $DATABASE_NAME <$DATABASE_USERDATA_SQL_FILE 1>/dev/null
 
 # Clean exit!
 exit 0

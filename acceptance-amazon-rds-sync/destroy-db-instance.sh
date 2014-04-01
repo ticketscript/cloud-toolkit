@@ -8,7 +8,8 @@ REGEX_CODE="<Code>(.*)</Code>"
 DIR=`dirname $0`
 
 # Include common RDS tasks
-source $DIR/rds-common.sh
+source $DIR/source
+source $DIR/rds-common
 
 
 #
@@ -24,7 +25,7 @@ case "$instance_status" in
 
 	"available")
 
-		rds-delete-db-instance -f --skip-final-snapshot --db-instance-identifier ts2acceptance
+		rds-delete-db-instance -f --skip-final-snapshot --db-instance-identifier $INSTANCE
 		rds_get_instance_status
 		;;
 

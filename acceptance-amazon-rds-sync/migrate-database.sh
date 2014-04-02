@@ -14,12 +14,12 @@ do_usage() {
 }
 
 # Check source folder
-if [ ! -d "$DATABASE_MIGRATION_SOURCE_DIR"]; then
+if [ ! -d "$DATABASE_MIGRATION_SOURCE_DIR" ]; then
 	do_usage
 fi
 
 # Check for previously executed SQL files
-if [ `ls $DATABASE_MIGRATION_TARGET_DIR/*.sql &> /dev/null` == "" ]; then
+if [ "`ls $DATABASE_MIGRATION_TARGET_DIR/*.sql 2> /dev/null`" == "" ]; then
 	echo "Please create $DATABASE_MIGRATION_TARGET_DIR first, and put all previously executed SQL migration files there" >&2
 	exit 1
 fi

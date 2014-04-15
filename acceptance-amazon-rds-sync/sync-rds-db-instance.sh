@@ -55,7 +55,7 @@ mysql -h $DATABASE_HOST $DATABASE_NAME < $DIR/post-migration-tweaks.sql 1>/dev/n
 ./reset-database-migration.sh $DATABASE_MIGRATION_SOURCE_DIR
 
 # Re-run previously executed database migration files
-./migration-database.sh $DATABASE_MIGRATION_SOURCE_DIR
+./migrate-database.sh $DATABASE_MIGRATION_SOURCE_DIR
 
 # Restore user data in ts2acceptance database
 mysql -h $DATABASE_HOST $DATABASE_NAME <$DATABASE_USERDATA_SQL_FILE 1>/dev/null

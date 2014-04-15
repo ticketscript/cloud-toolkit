@@ -19,25 +19,37 @@ if [ ! -d "$DATABASE_MIGRATION_SOURCE_DIR"]; then
 fi
 
 # Check for previously executed SQL files
-if [ `ls $DATABASE_MIGRATION_TARGET_DIR/*.sql &> /dev/null` == "" ]; then
+sql_executed=$(ls $DATABASE_MIGRATION_TARGET_DIR/*.sql 2> /dev/null)
+
+if [ "$sql_executed" == "" ]; then
 	echo "Please create $DATABASE_MIGRATION_TARGET_DIR first, and put all previously executed SQL migration files there" >&2
 	exit 1
 fi
 
-for sql_file in `ls -1 $DATABASE_MIGRATION_SOURCE_DIR/*.sql`; do
+# Split file names on newline
+IFS=$'\n'
+
+for sql_file_path in `ls -1 $DATABASE_MIGRATION_SOURCE_DIR/*.sql`; do
+
+	# Get SQL migration file name
+    sql_file=$(basename $sql_file_path)
 
 	if [ ! -f "$DATABASE_MIGRATION_TARGET_DIR/$sql_file"]; then
 		# Execute new MySQL file
-		mysql -h $DATABASE_HOST $DATABASE_NAME < $DATABASE_MIGRATION_TARGET_DIR/$sql_file 1>/dev/null
+		mysql -h $DATABASE_HOST $DATABASE_NAME < $sql_file_path 1>/dev/null
 
+		# Check for MySQL migration result
 		if [ $? -gt 0 ]; then
 			echo "ERROR - Failed to execute $sql_file!" >&2
 			exit 1
 		fi
+
+		# Copy execute SQL file to target dir
+		cp $sql_file_path $DATABASE_MIGRATION_TARGET_DIR/
 	else
 
 		# Compare SQL file
-		diff_output=`diff $DATABASE_MIGRATION_SOURCE_DIR/$sql_file $DATABASE_MIGRATION_TARGET_DIR/$sql_file`
+		diff_output=$(diff -q $sql_file_path $DATABASE_MIGRATION_TARGET_DIR/$sql_file)
 
 		if [ "$diff_output" != "" ]; then
 			echo "WARNING - Changed detected in previously executed SQL file: $sql_file"

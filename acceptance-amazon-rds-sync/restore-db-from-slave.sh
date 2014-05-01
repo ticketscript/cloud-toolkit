@@ -91,6 +91,9 @@ echo -n "Rebooting DB instance $INSTANCE"
 
 rds-reboot-db-instance ts2acceptance
 
+# Check status and wait until the instance is available again
+rds_get_instance_status
+
 while [[ "$instance_status" =~ $INSTANCE_WAIT_STATE ]]; do
 	echo -n "."
 	rds_get_instance_status

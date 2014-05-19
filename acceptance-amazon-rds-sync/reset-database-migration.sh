@@ -11,7 +11,7 @@ DIR=`dirname $0`
 source $DIR/config
 
 # Reset 'migration' folder to origin/master
-sudo -u ticketwww  sh -c "cd $DATABASE_MIGRATION_SOURCE_DIR && git fetch origin && git checkout origin/master"
+sudo -u ticketwww sh -c "cd $DATABASE_MIGRATION_SOURCE_DIR && git stash && git fetch origin && git checkout -q origin/master"
 
 # Backup previous sql-processed folder
 if [ -d $DATABASE_MIGRATION_TARGET_DIR ]; then
@@ -26,4 +26,4 @@ mkdir $DATABASE_MIGRATION_TARGET_DIR
 cp $DATABASE_MIGRATION_SOURCE_DIR/*.sql $DATABASE_MIGRATION_TARGET_DIR/
 
 # Reset Git working folder to previous branch
-sudo -u ticketwww  sh -c "cd $DATABASE_MIGRATION_SOURCE_DIR && git checkout -"
+sudo -u ticketwww sh -c "cd $DATABASE_MIGRATION_SOURCE_DIR && git checkout -q - && git stash pop"

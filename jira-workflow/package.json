@@ -1,0 +1,17 @@
+{
+  "name": "jira-workflow",
+  "description": "JIRA workflow automation for Bamboo and Git",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "3.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ticketscript/cloud-toolkit.git"
+  },
+  "devDependencies": {
+  },
+  "engines": {
+    "node": ">=0.10.15"
+  }
+}

@@ -76,7 +76,7 @@ mysql -h $DATABASE_HOST $DATABASE_NAME < $DIR/post-migration-tweaks.sql 1>/dev/n
 ./set-autoincrement.sh $DATABASE_NAME $DATABASE_HOST $DATABASE_OFFSET
 
 # Execute database migration files
-./execute-migration.sh $DATABASE_MIGRATION_SOURCE_DIR
+./execute-migration.sh
 
 # Restore user data in ts2acceptance database
 mysql -h $DATABASE_HOST $DATABASE_NAME <$DATABASE_USERDATA_SQL_FILE 1>/dev/null

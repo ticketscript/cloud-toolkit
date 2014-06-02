@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 DATABASE="$1"
 HOST="$2"
 ID="$3"
@@ -24,5 +24,5 @@ if [ "$ID" == "" ]; then
 fi
  
 while read table key ; do 
-  mysql -h $HOST -e "ALTER TABLE $table AUTO_INCREMENT=$ID;" $DATABASE 1>/dev/null
-done < table-list
+  echo "ALTER TABLE $table AUTO_INCREMENT=$ID;"
+done < table-list | mysql -h $HOST $DATABASE

@@ -36,7 +36,7 @@ for sql_file_path in `ls -1 $DATABASE_MIGRATION_SOURCE_DIR/*.sql`; do
 
 	if [ ! -f "$DATABASE_MIGRATION_TARGET_DIR/$sql_file" ]; then
 		# Execute new MySQL file
-		mysql -h $DATABASE_HOST $DATABASE_NAME < $sql_file_path 1>/dev/null
+		mysql -h $DATABASE_HOST $DATABASE_NAME < $DATABASE_MIGRATION_SOURCE_DIR/$sql_file 1>/dev/null
 
 		# Check for MySQL migration result
 		if [ $? -gt 0 ]; then

@@ -62,7 +62,7 @@ case "$instance_status" in
 esac
 
 # Wait for instance to complete
-INSTANCE_WAIT_STATE="creating|modifying|rebooting"
+INSTANCE_WAIT_STATE="creating|modifying|rebooting|backing-up"
 
 while [[ "$instance_status" =~ $INSTANCE_WAIT_STATE ]]; do
 	echo -n "."

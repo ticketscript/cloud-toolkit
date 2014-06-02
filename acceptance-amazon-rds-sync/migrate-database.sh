@@ -44,9 +44,9 @@ for sql_file_path in `ls -1 $DATABASE_MIGRATION_SOURCE_DIR/*.sql`; do
 			exit 1
 		fi
 
-		# Copy migration file to 'executed' SQL migration file directory
-		cp $DATABASE_MIGRATION_SOURCE_DIR/$sql_file $DATABASE_MIGRATION_TARGET_DIR/
-		
+		# Copy execute SQL file to target dir
+		cp $sql_file_path $DATABASE_MIGRATION_TARGET_DIR/
+
 	else
 
 		# Compare SQL file

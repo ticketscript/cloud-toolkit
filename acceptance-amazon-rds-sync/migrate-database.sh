@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Local directory
-DIR=`dirname $0`
+DIR=$(dirname "$0")
 
 source $DIR/config
 
@@ -14,8 +14,8 @@ do_usage() {
 }
 
 # Check source folder
-if [ ! -d "$DATABASE_MIGRATION_SOURCE_DIR"]; then
-	do_usage()
+if [ ! -d "$DATABASE_MIGRATION_SOURCE_DIR" ]; then
+	do_usage
 fi
 
 # Check for previously executed SQL files
@@ -34,7 +34,7 @@ for sql_file_path in `ls -1 $DATABASE_MIGRATION_SOURCE_DIR/*.sql`; do
 	# Get SQL migration file name
     sql_file=$(basename $sql_file_path)
 
-	if [ ! -f "$DATABASE_MIGRATION_TARGET_DIR/$sql_file"]; then
+	if [ ! -f "$DATABASE_MIGRATION_TARGET_DIR/$sql_file" ]; then
 		# Execute new MySQL file
 		mysql -h $DATABASE_HOST $DATABASE_NAME < $sql_file_path 1>/dev/null
 
@@ -46,6 +46,7 @@ for sql_file_path in `ls -1 $DATABASE_MIGRATION_SOURCE_DIR/*.sql`; do
 
 		# Copy execute SQL file to target dir
 		cp $sql_file_path $DATABASE_MIGRATION_TARGET_DIR/
+
 	else
 
 		# Compare SQL file

@@ -27,7 +27,6 @@ for sql_file_path in `ls -1 $DATABASE_MIGRATION_TARGET_DIR/*.sql`; do
 		# Check for MySQL migration result
 		if [ $? -gt 0 ]; then
 			echo "ERROR - Failed to execute $sql_file!" >&2
-			exit 1
 		fi
     fi
 done

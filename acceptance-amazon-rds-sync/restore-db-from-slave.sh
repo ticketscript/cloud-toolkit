@@ -86,6 +86,15 @@ if [ "$instance_paramgroup" != "$INSTANCE_PARAM_GROUP" ]; then
 	echo " done!"
 fi
 
+# Check status and wait until the instance is available again
+rds_get_instance_status
+
+while [[ "$instance_status" =~ $INSTANCE_WAIT_STATE ]]; do
+	echo -n "."
+	rds_get_instance_status
+	sleep 25
+done
+
 # Reboot instance to apply modifications
 echo -n "Rebooting DB instance $INSTANCE"
 

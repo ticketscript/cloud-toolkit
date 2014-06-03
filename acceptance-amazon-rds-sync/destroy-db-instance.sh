@@ -39,14 +39,8 @@ case "$instance_status" in
 
 esac
 
-# Wait for instance to complete
-while [[ "$instance_status" == "deleting" ]]; do
-	echo -n "."
-	rds_get_instance_status
-	sleep 25
-done
-
-echo
+# Wait for the instance to be deleted
+rds_wait_state
 
 # Clean exit!
 exit 0

@@ -4,8 +4,6 @@ REGEX_CODE="<Code>(.*)</Code>"
 REGEX_PROGRESS="<PercentProgress>([0-9]+)</PercentProgress>"
 REGEX_INSTANCE_PARAMGROUP="<DBParameterGroupName>(.*)</DBParameterGroupName>"
 
-
-
 #
 # Common RDS functions
 #
@@ -58,6 +56,20 @@ rds_get_snapshot_status() {
 	if [[ "$snapshot_info" =~ $REGEX_PROGRESS ]]; then
 		snapshot_progress="${BASH_REMATCH[1]}"
 	fi
+}
+
+rds_wait_state() {
+
+	INSTANCE_WAIT_STATE="creating|modifying|rebooting|backing-up|deleting"
+
+	# Check status and wait until the instance is available again
+	rds_get_instance_status
+
+	while [[ "$instance_status" =~ $INSTANCE_WAIT_STATE ]]; do
+		echo -n "."
+		rds_get_instance_status
+		sleep 25
+	done
 }
 
 rds_create_snapshot() {

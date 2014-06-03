@@ -61,16 +61,8 @@ case "$instance_status" in
 
 esac
 
-# Wait for instance to complete
-INSTANCE_WAIT_STATE="creating|modifying|rebooting|backing-up"
-
-while [[ "$instance_status" =~ $INSTANCE_WAIT_STATE ]]; do
-	echo -n "."
-	rds_get_instance_status
-	sleep 25
-done
-
-echo
+# Wait for instance to become available
+rds_wait_state
 
 # Verify and modify DB instance parameter group
 if [ "$instance_paramgroup" != "$INSTANCE_PARAM_GROUP" ]; then
@@ -83,33 +75,17 @@ if [ "$instance_paramgroup" != "$INSTANCE_PARAM_GROUP" ]; then
 	  --db-parameter-group-name "$INSTANCE_PARAM_GROUP" \
 	  --vpc-security-group-ids "$INSTANCE_VPC_SECURITY_GROUPS"
 
-	echo " done!"
+	# Wait for modifications to complete
+	rds_wait_state
 fi
-
-# Check status and wait until the instance is available again
-rds_get_instance_status
-
-while [[ "$instance_status" =~ $INSTANCE_WAIT_STATE ]]; do
-	echo -n "."
-	rds_get_instance_status
-	sleep 25
-done
 
 # Reboot instance to apply modifications
 echo -n "Rebooting DB instance $INSTANCE"
 
 rds-reboot-db-instance ts2acceptance
 
-# Check status and wait until the instance is available again
-rds_get_instance_status
-
-while [[ "$instance_status" =~ $INSTANCE_WAIT_STATE ]]; do
-	echo -n "."
-	rds_get_instance_status
-	sleep 25
-done
-
-echo " done!"
+# Wait for instance to become available again
+rds_wait_state
 
 # Clean exit!
 exit 0

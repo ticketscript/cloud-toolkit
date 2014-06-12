@@ -5,8 +5,8 @@ var Config = Config || {};
 
 Config.atlassian = {};
 
-Config.atlassian.hostname = 'SSSS';
-Config.atlassian.username = 'SSSS';
-Config.atlassian.pass = 'SSSS';
+Config.atlassian.hostname = 'yourHostname';
+Config.atlassian.username = 'yourUsername';
+Config.atlassian.pass = 'yourPassword';
 
 module.exports = Config;

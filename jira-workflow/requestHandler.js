@@ -65,7 +65,7 @@ RequestHandler.prototype.handle = function(params) {
 		case 'create-branch':
 		case 'build':
 		case 'deploy':
-			console.log('Action ' + params.action + ' called for issue ' + params.issueKey);
+			// console.log('Action ' + params.action + ' called for issue ' + params.issueKey);
 			break;
 
 		default:

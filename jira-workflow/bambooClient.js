@@ -15,6 +15,7 @@ function BambooClient() {
         HOSTNAME: '',
         AUTHCREDENTIALS: '',
 
+        buildPlanName: null,
         branchName: null,
         buildPlanShortKey: null,
 
@@ -33,6 +34,7 @@ function BambooClient() {
 				branch;
 
             this.branchName = branch;
+            this.buildPlanName = planName;
 			// console.log('Triggered Bamboo project ' + planName + ' - ' + stage
 			//					+ ' for branch ' + branch);
 
@@ -67,7 +69,7 @@ function BambooClient() {
                     if (!bambooClient.planExists(d)) {
 
                         bambooClient.createPlanBranch('PUT',
-                            '/builds/rest/api/latest/plan/TSP-TSPU/branch/' + bambooClient.branchName + '.json');
+                            '/builds/rest/api/latest/plan/' + bambooClient.buildPlanName +'/branch/' + bambooClient.branchName + '.json');
                     } else {
                         // console.log('plan already exists');
                     }

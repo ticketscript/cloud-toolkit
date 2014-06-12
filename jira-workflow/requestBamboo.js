@@ -2,7 +2,7 @@ var errorMessage = require('./errorMessages');
 var BambooClient = require('./bambooClient');
 
 /*
- * Constructor
+ * ConstructorRequestHandler
  */
 function RequestBamboo(issueKey) {
 
@@ -10,17 +10,17 @@ function RequestBamboo(issueKey) {
 			requestBamboo = {
 
 		issueKey: issueKey,
-		client: BambooClient();
+		client: BambooClient(),
 
 		handleAction: function(action, params){
 
 			var action,
-					params;
+                params;
 
 			switch (action) {
 
 				case 'trigger':
-					this.triggerProject(params[0], params[1]);
+					this.triggerProject(params);
 					break;
 
 				default:
@@ -28,10 +28,9 @@ function RequestBamboo(issueKey) {
 			}
 		},
 
-		triggerProject: function(params)) {
-			var params;
-			// Trigger Bamboo project
-			this.client.trigger(params.project, params.stage, this.issueKey);
+		triggerProject: function(params) {
+            var params;
+			this.client.triggerProject(params.project, params.stage, this.issueKey);
 		}
 	}
 

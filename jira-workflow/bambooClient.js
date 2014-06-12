@@ -1,5 +1,5 @@
+var Config = require('./config')
 var https = require('https');
-
 var errorMessage = require('./errorMessages');
 
 /*
@@ -10,10 +10,10 @@ function BambooClient() {
 	var bambooClient = {
 
         /**
-         * hostname && auth credentials
+         * hostname && auth credentials, from an git-ignored config object
          */
-        HOSTNAME: '',
-        AUTHCREDENTIALS: '',
+        HOSTNAME: Config.atlassian.hostname,
+        AUTHCREDENTIALS: Config.atlassian.username+':'+Config.atlassian.pass,
 
         buildPlanName: null,
         branchName: null,

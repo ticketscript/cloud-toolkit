@@ -24,7 +24,6 @@ RequestHandler.prototype.handleRequest = function(request, response){
 	try {
 
 		// Call selected request handler
-		// console.log(request.params);
 
 		switch (request.params.type) {
 
@@ -50,8 +49,6 @@ RequestHandler.prototype.handleRequest = function(request, response){
 		responseJson.error = err;
 	}
 
-	// console.log(responseJson);
-
 	// Send response
 	response.status(responseCode);
 	response.send(responseJson);
@@ -65,7 +62,7 @@ RequestHandler.prototype.handle = function(params) {
 		case 'create-branch':
 		case 'build':
 		case 'deploy':
-			// console.log('Action ' + params.action + ' called for issue ' + params.issueKey);
+			console.log('Action ' + params.action + ' called for issue ' + params.issueKey);
 			break;
 
 		default:

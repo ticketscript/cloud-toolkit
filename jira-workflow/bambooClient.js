@@ -35,8 +35,8 @@ function BambooClient() {
 
             this.branchName = branch;
             this.buildPlanName = planName;
-			// console.log('Triggered Bamboo project ' + planName + ' - ' + stage
-			//					+ ' for branch ' + branch);
+            console.log('Triggered Bamboo project ' + planName + ' - ' + stage
+                + ' for branch ' + branch);
 
 			plan = this.sendRequest('GET', '/builds/rest/api/latest/plan/' + planName + '.json?expand=branches');
 		},
@@ -62,9 +62,6 @@ function BambooClient() {
 
             var req = https.request(options, function(res) {
 
-                // console.log("statusCode: ", res.statusCode);
-                // console.log("headers: ", res.headers);
-
                 res.on('data', function(d) {
                     if (!bambooClient.planExists(d)) {
 
@@ -87,7 +84,6 @@ function BambooClient() {
         planExists: function (jsonResponse) {
             var jsonResponse,
             parsedResponse = JSON.parse(jsonResponse);
-            // console.log(parsedResponse);
 
             for (var branchName in parsedResponse['branches']['branch']) {
                 if (this.branchName == parsedResponse['branches']['branch'][branchName]['shortName']){
@@ -119,21 +115,16 @@ function BambooClient() {
 
             var req = https.request(options, function(res) {
 
-                // console.log("statusCode: ", res.statusCode);
-                // console.log("headers: ", res.headers);
-
                 res.on('data', function(d) {
 
                     var parsedResponse = JSON.parse(d);
-                    // console.log(parsedResponse);
 
                     if (res.statusCode == 200){
 
-                        // console.log(JSON.parse(d));
                         bambooClient.queuePlanBranch('POST', '/builds/rest/api/latest/queue/TSP-' + parsedResponse['shortKey'] + '.json');
                     } else {
 
-                        // console.log('plan branch not created');
+                        console.error('plan branch not created');
                     }
                 });
             });
@@ -164,11 +155,8 @@ function BambooClient() {
             }
 
             var req = https.request(options, function(res) {
-                // console.log("statusCode: ", res.statusCode);
-                // console.log("headers: ", res.headers);
 
                 res.on('data', function(d) {
-                    // console.log(JSON.parse(d));
                 });
             });
             req.on('error', function (err) {

@@ -12,15 +12,15 @@ function RequestBamboo(issueKey) {
 		issueKey: issueKey,
 		client: BambooClient(),
 
-		handleAction: function(action, params){
+		handleAction: function(action, requestParams){
 
 			var action,
-                params;
+                requestParams;
 
 			switch (action) {
 
 				case 'trigger':
-					this.triggerProject(params);
+					this.triggerProject(requestParams);
 					break;
 
 				default:
@@ -28,9 +28,9 @@ function RequestBamboo(issueKey) {
 			}
 		},
 
-		triggerProject: function(params) {
-            var params;
-			this.client.triggerProject(params.project, params.stage, this.issueKey);
+		triggerProject: function(requestParams) {
+            var requestParams;
+			this.client.triggerProject(requestParams.project, requestParams.stage, this.issueKey);
 		}
 	}
 

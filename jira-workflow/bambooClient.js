@@ -24,7 +24,6 @@ function BambooClient() {
          * @param {string} planName the name of the build plan
          * @param {string} stage the stage of the build process
          * @param {string} branch the name of the jira story branch
-         * @return {string} Human-readable representation of this Circle.
          */
 		triggerProject: function(planName, stage, branch){
 
@@ -34,8 +33,8 @@ function BambooClient() {
 				branch;
 
             this.branchName = branch;
-			console.log('Triggered Bamboo project ' + planName + ' - ' + stage
-								+ ' for branch ' + branch);
+			// console.log('Triggered Bamboo project ' + planName + ' - ' + stage
+			//					+ ' for branch ' + branch);
 
 			plan = this.sendRequest('GET', '/builds/rest/api/latest/plan/' + planName + '.json?expand=branches');
 		},
@@ -43,7 +42,7 @@ function BambooClient() {
         /**
          * create a plan branch via api call
          *
-         * @rparam {string} the http request method
+         * @param {string} the https request method
          * @param {string} the path for the api call
          */
         sendRequest: function(method, url) {
@@ -61,8 +60,8 @@ function BambooClient() {
 
             var req = https.request(options, function(res) {
 
-                console.log("statusCode: ", res.statusCode);
-                console.log("headers: ", res.headers);
+                // console.log("statusCode: ", res.statusCode);
+                // console.log("headers: ", res.headers);
 
                 res.on('data', function(d) {
                     if (!bambooClient.planExists(d)) {
@@ -70,7 +69,7 @@ function BambooClient() {
                         bambooClient.createPlanBranch('PUT',
                             '/builds/rest/api/latest/plan/TSP-TSPU/branch/' + bambooClient.branchName + '.json');
                     } else {
-                        console.log('plan already exists');
+                        // console.log('plan already exists');
                     }
                 });
             });
@@ -81,26 +80,25 @@ function BambooClient() {
          * check to see if the build plan branch already exists
          *
          * @param {string} jsonResponse
-         * @return {boolean} exists whether or not the plan branch already exists
+         * @return {boolean} whether or not the plan branch already exists
          */
         planExists: function (jsonResponse) {
             var jsonResponse,
             parsedResponse = JSON.parse(jsonResponse);
-            var exists = false;
-                console.log(parsedResponse);
+            // console.log(parsedResponse);
 
             for (var branchName in parsedResponse['branches']['branch']) {
                 if (this.branchName == parsedResponse['branches']['branch'][branchName]['shortName']){
-                    exists = true;
+                    return true;
                 }
             }
-            return exists;
+            return false;
         },
 
         /**
          * api call to create a bamboo plan branch for a jira story
          *
-         * @param {string} method the http method
+         * @param {string} method the https method
          * @oaram {string} url the path for the api call
          */
         createPlanBranch: function(method, url) {
@@ -119,22 +117,21 @@ function BambooClient() {
 
             var req = https.request(options, function(res) {
 
-                console.log("statusCode: ", res.statusCode);
-                console.log("headers: ", res.headers);
+                // console.log("statusCode: ", res.statusCode);
+                // console.log("headers: ", res.headers);
 
                 res.on('data', function(d) {
 
                     var parsedResponse = JSON.parse(d);
-                    console.log(parsedResponse);
+                    // console.log(parsedResponse);
 
                     if (res.statusCode == 200){
 
-                        console.log(JSON.parse(d));
+                        // console.log(JSON.parse(d));
                         bambooClient.queuePlanBranch('POST', '/builds/rest/api/latest/queue/TSP-' + parsedResponse['shortKey'] + '.json');
-                        console.log();
                     } else {
 
-                        console.log('plan branch not created');
+                        // console.log('plan branch not created');
                     }
                 });
             });
@@ -144,7 +141,7 @@ function BambooClient() {
         /**
          * api call to queue (run) a bamboo plan branch for a jira story
          *
-         * @param {string} method the http method
+         * @param {string} method the https method
          * @oaram {string} url the path for the api call
          */
         queuePlanBranch: function(method, url) {
@@ -165,11 +162,11 @@ function BambooClient() {
             }
 
             var req = https.request(options, function(res) {
-                console.log("statusCode: ", res.statusCode);
-                console.log("headers: ", res.headers);
+                // console.log("statusCode: ", res.statusCode);
+                // console.log("headers: ", res.headers);
 
                 res.on('data', function(d) {
-                    console.log(JSON.parse(d));
+                    // console.log(JSON.parse(d));
                 });
             });
             req.on('error', function (err) {

@@ -2,4 +2,3 @@ temp.sql
 table-list
 config
 post-migration-tweaks.sql
-../jira-workflow/config.js

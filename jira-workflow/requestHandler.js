@@ -24,7 +24,7 @@ RequestHandler.prototype.handleRequest = function(request, response){
 	try {
 
 		// Call selected request handler
-		console.log(request.params);
+		// console.log(request.params);
 
 		switch (request.params.type) {
 

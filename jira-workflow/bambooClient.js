@@ -38,7 +38,7 @@ function BambooClient() {
             console.log('Triggered Bamboo project ' + planName + ' - ' + stage
                 + ' for branch ' + branch);
 
-			plan = this.sendRequest('GET', '/builds/rest/api/latest/plan/' + planName + '.json?expand=branches');
+			plan = this.sendRequest('GET', '/rest/api/latest/plan/' + planName + '.json?expand=branches');
 		},
 
         /**
@@ -66,7 +66,7 @@ function BambooClient() {
                     if (!bambooClient.planExists(d)) {
 
                         bambooClient.createPlanBranch('PUT',
-                            '/builds/rest/api/latest/plan/' + bambooClient.buildPlanName +'/branch/' + bambooClient.branchName + '.json');
+                            '/rest/api/latest/plan/' + bambooClient.buildPlanName +'/branch/' + bambooClient.branchName + '.json');
                     } else {
                         // console.log('plan already exists');
                     }
@@ -121,7 +121,7 @@ function BambooClient() {
 
                     if (res.statusCode == 200){
 
-                        bambooClient.queuePlanBranch('POST', '/builds/rest/api/latest/queue/TSP-' + parsedResponse['shortKey'] + '.json');
+                        bambooClient.queuePlanBranch('POST', '/rest/api/latest/queue/TSP-' + parsedResponse['shortKey'] + '.json');
                     } else {
 
                         console.error('plan branch not created');

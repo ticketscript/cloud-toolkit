@@ -144,7 +144,7 @@ function BambooClient() {
          * api call to queue (run) a bamboo plan branch for a jira story
          *
          * @param {string} method the https method
-         * @oaram {string} url the path for the api call
+         * @param {string} url the path for the api call
          */
         queuePlanBranch: function(method, url) {
            var method,

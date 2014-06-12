@@ -101,7 +101,7 @@ function BambooClient() {
          * api call to create a bamboo plan branch for a jira story
          *
          * @param {string} method the https method
-         * @oaram {string} url the path for the api call
+         * @param {string} url the path for the api call
          */
         createPlanBranch: function(method, url) {
 

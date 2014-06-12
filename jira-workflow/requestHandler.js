@@ -50,7 +50,7 @@ RequestHandler.prototype.handleRequest = function(request, response){
 		responseJson.error = err;
 	}
 
-	console.log(responseJson);
+	// console.log(responseJson);
 
 	// Send response
 	response.status(responseCode);

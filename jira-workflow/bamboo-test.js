@@ -7,4 +7,4 @@
 var BambooClient = require('./bambooClient');
 
 var client = BambooClient();
-client.triggerProject('TSP-TSPU', 'create', 'TSP-johnarchTestPlanBranch113');
+client.triggerProject('TSP-TSPU', 'create', 'DemoJiraStoryName');

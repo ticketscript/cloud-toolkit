@@ -38,16 +38,16 @@ function BambooClient() {
             console.log('Triggered Bamboo project ' + planName + ' - ' + stage
                 + ' for branch ' + branch);
 
-			plan = this.sendRequest('GET', Config.atlassian.pathPrefix + '/rest/api/latest/plan/' + planName + '.json?expand=branches');
+			this.retrievePlanBranches('GET', Config.atlassian.pathPrefix + '/rest/api/latest/plan/' + planName + '.json?expand=branches');
 		},
 
         /**
-         * create a plan branch via api call
+         * api call to retrieve the branches that currently exist
          *
          * @param {string} the https request method
          * @param {string} the path for the api call
          */
-        sendRequest: function(method, url) {
+        retrievePlanBranches: function(method, url) {
 
             var method,
                 url;
@@ -69,7 +69,7 @@ function BambooClient() {
                             Config.atlassian.pathPrefix +  '/rest/api/latest/plan/'
                                 + bambooClient.buildPlanName +'/branch/' + bambooClient.branchName + '.json');
                     } else {
-                        // console.log('plan already exists');
+                        console.log('plan already exists');
                     }
                 });
             });

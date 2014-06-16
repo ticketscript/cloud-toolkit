@@ -10,7 +10,7 @@ var RequestHandler = require('./requestHandler');
 // Init request handlers
 var handlerBamboo = new RequestHandler();
 
-var app = express();
+var app = express.createServer();
 app.use(app.router);
 
 // Routes

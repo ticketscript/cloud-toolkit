@@ -24,7 +24,6 @@ RequestHandler.prototype.handleRequest = function(request, response){
 	try {
 
 		// Call selected request handler
-		console.log(typeof request.body);
 
 		switch (request.params.type) {
 
@@ -49,8 +48,6 @@ RequestHandler.prototype.handleRequest = function(request, response){
 		responseJson.success = false;
 		responseJson.error = err;
 	}
-
-	console.log(responseJson);
 
 	// Send response
 	response.status(responseCode);

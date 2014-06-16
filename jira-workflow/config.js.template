@@ -1,0 +1,17 @@
+/**
+ * configuration file for the jira workflow
+ */
+var Config = Config || {};
+
+Config.atlassian = {};
+
+Config.atlassian.hostname = 'yourHostname';
+Config.atlassian.username = 'yourUsername';
+Config.atlassian.pass = 'yourPassword';
+
+/**
+ * for customizing the path to your atlassian rest api call
+ */
+Config.atlassian.pathPrefix = '/pathPrefix';
+
+module.exports = Config;

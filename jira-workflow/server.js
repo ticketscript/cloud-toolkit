@@ -17,4 +17,4 @@ app.use(app.router);
 app.post('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage', handlerBamboo.handleRequest);
 
 // Start server
-app.listen(4444);
+app.listen(443);

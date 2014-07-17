@@ -83,7 +83,6 @@ function BambooClient() {
          * @return {boolean} whether or not the plan branch already exists
          */
         planExists: function (jsonResponse) {
-            var jsonResponse,
             parsedResponse = JSON.parse(jsonResponse);
 
             for (var branchName in parsedResponse['branches']['branch']) {
@@ -117,6 +116,8 @@ function BambooClient() {
             var req = https.request(options, function(res) {
 
                 res.on('data', function(d) {
+
+                    console.log(d.toString());
 
                     var parsedResponse = JSON.parse(d);
 

@@ -76,7 +76,7 @@ function BambooClient() {
                             Config.atlassian.pathPrefix + '/rest/api/latest/plan/'
                                 + bambooClient.buildPlanName + '/branch/' + bambooClient.branchName + '.json?vcsBranch='+ bambooClient.branchName);
                     } else if (bambooClient.buildPlanName == 'TSP-CIS') {
-                        // the branch exists, but this ia TSP-CIS (so queue it anyway)
+                        // the branch exists, but this is TSP-CIS (so queue it anyway)
                         var plan = bambooClient.fetchPlan(stringResponse);
 
                         console.log("queueing " + bambooClient.buildPlanName + '/branch/' + bambooClient.branchName);
@@ -172,8 +172,8 @@ function BambooClient() {
         queuePlanBranch: function (method, url) {
             var method,
                 url,
-                postData = 'bamboo.variable.branchShortName=' + bambooClient.branchName;
-            postDataLength = postData.length;
+                postData = 'bamboo.variable.branchShortName=' + bambooClient.branchName,
+                postDataLength = postData.length;
 
             var options = {
                 hostname: this.HOSTNAME,

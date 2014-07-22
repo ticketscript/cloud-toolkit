@@ -30,7 +30,7 @@ function RequestBamboo(issueKey) {
 
 		triggerProject: function(requestParams) {
             var requestParams;
-			this.client.createPullRequest(requestParams.project, requestParams.stage, this.issueKey);
+			this.client.triggerProject(requestParams.project, requestParams.stage, this.issueKey);
 		}
 	}
 

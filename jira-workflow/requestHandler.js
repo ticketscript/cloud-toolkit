@@ -36,6 +36,7 @@ RequestHandler.prototype.handleRequest = function (request, response) {
             case 'github':
                 var handler = new requestGitHub();
                 responseJson.result = handler.handleAction(request.params.action, request.params);
+                break;
             default:
                 throw new Error('Unknown handler type: ' + request.params.type);
         }

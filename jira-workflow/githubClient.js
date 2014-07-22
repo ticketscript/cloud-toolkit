@@ -10,18 +10,20 @@ function GitHubClient() {
     var githubClient = {
 
         /**
-         * hostname && auth credentials, from an git-ignored config object
+         * hostname && auth credentials
          */
         HOSTNAME: Config.github.hostname,
         USERNAME: Config.github.username,
         PASSWORD: Config.github.pass,
 
         /**
-         * craete a pull request
+         * create a pull request
          *
-         * @param {string} planName the name of the build plan
-         * @param {string} stage the stage of the build process
-         * @param {string} branch the name of the jira story branch
+         * @param {string} repo          the repository
+         * @param {string} head          the head branch
+         * @param {string} base          the base branch
+         * @param {string} title         the title of the pull request
+         * @param {string} description   the description of the pull request
          */
         createPullRequest: function (repo, head, base, title, description) {
 

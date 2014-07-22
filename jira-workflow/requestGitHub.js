@@ -30,7 +30,7 @@ function RequestGitHub() {
 
         /**
          * create a new pull request
-         * 
+         *
          * @param requestParams
          */
         createPullRequest: function (requestParams) {

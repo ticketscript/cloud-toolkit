@@ -10,6 +10,12 @@ function RequestGitHub() {
 
         client: GitHubClient(),
 
+        /**
+         * handle the action
+         *
+         * @param action
+         * @param requestParams
+         */
         handleAction: function (action, requestParams) {
 
             switch (action) {
@@ -22,6 +28,11 @@ function RequestGitHub() {
             }
         },
 
+        /**
+         * create a new pull request
+         * 
+         * @param requestParams
+         */
         createPullRequest: function (requestParams) {
             this.client.createPullRequest(requestParams.repo, requestParams.head, requestParams.base, requestParams.title, requestParams.description);
         }

@@ -5,7 +5,7 @@
  *   /jira/   -- send POST requests from JIRA's hooks here
  */
 var express = require("express");
-var RequestHandler = require('./handler');
+var RequestHandler = require('./requestHandler');
 
 // Init request handlers
 var handler = new RequestHandler();

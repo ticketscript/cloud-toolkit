@@ -13,11 +13,15 @@ var handler = new RequestHandler();
 var app = express();
 app.use(app.router);
 
-// Routes
+
 // Bamboo route
 app.post('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage', handler.handleRequest);
-// GitHub route
+
+
+// GitHub routes
 app.post('/jira/:type(github)/:action(create_pull_request)/:repo/:base/:head/:title/:description?', handler.handleRequest);
+app.post('/jira/:type(github)/:action(complete_subtask)/:repo/:base/:head', handler.handleRequest);
+
 
 // Start server
 app.listen(443);

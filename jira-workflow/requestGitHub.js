@@ -20,7 +20,10 @@ function RequestGitHub() {
 
             switch (action) {
                 case 'create_pull_request':
-                    this.triggerProject(requestParams);
+                    this.createPullRequest(requestParams);
+                    break;
+                case 'complete_subtask':
+                    this.completeSubtask(requestParams);
                     break;
 
                 default:
@@ -35,6 +38,16 @@ function RequestGitHub() {
          */
         createPullRequest: function (requestParams) {
             this.client.createPullRequest(requestParams.repo, requestParams.head, requestParams.base, requestParams.title, requestParams.description);
+        }
+
+        /**
+         * complete the subtask
+         *
+         * @param requestParams
+         */
+        completeSubtask: function (requestParams) {
+
+            this.client.completeSubtask(requestParams.repo, requestParams.base, requestParams.head);
         }
     }
 

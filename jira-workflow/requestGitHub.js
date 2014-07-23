@@ -23,6 +23,7 @@ function RequestGitHub() {
                     this.createPullRequest(requestParams);
                     break;
                 case 'complete_subtask':
+                    this.completeSubtask(requestParams);
                     break;
 
                 default:

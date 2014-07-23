@@ -110,8 +110,6 @@ function GitHubClient() {
                 });
 
                 res.on('end', function (d) {
-
-                    console.log(stringResponse);
                 });
 
             });

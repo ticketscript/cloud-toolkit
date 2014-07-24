@@ -71,10 +71,23 @@ function BambooClient() {
                 res.on('end', function (d) {
 
                     if (!bambooClient.planExists(stringResponse)) {
-                        // this branch does not exist
-                        bambooClient.createPlanBranch('PUT',
-                            Config.atlassian.pathPrefix + '/rest/api/latest/plan/'
-                                + bambooClient.buildPlanName + '/branch/' + bambooClient.branchName + '.json?vcsBranch='+ bambooClient.branchName);
+
+                        switch (bambooClient.buildPlanName) {
+
+                            case 'TSP-CIS':
+                                // this branch does not exist
+                                bambooClient.createPlanBranch('PUT',
+                                    Config.atlassian.pathPrefix + '/rest/api/latest/plan/'
+                                        + bambooClient.buildPlanName + '/branch/' + bambooClient.branchName + '.json?vcsBranch='+ bambooClient.branchName);
+                                break;
+                            case 'TSP-TSPU':
+                                // this branch does not exist
+                                bambooClient.createPlanBranch('PUT',
+                                    Config.atlassian.pathPrefix + '/rest/api/latest/plan/'
+                                        + bambooClient.buildPlanName + '/branch/' + bambooClient.branchName + '.json');
+                                break;
+                        }
+
                     } else if (bambooClient.buildPlanName == 'TSP-CIS') {
                         // the branch exists, but this is TSP-CIS (so queue it anyway)
                         var plan = bambooClient.fetchPlan(stringResponse);

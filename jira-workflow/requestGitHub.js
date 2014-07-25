@@ -38,7 +38,7 @@ function RequestGitHub() {
          */
         createPullRequest: function (requestParams) {
             this.client.createPullRequest(requestParams.repo, requestParams.head, requestParams.base, requestParams.title, requestParams.description);
-        }
+        },
 
         /**
          * complete the subtask

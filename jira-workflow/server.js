@@ -1,6 +1,6 @@
 /*
  * JIRA - Bamboo integration server for Node.JS
- * 
+ *
  * End points:
  *   /jira/   -- send POST requests from JIRA's hooks here
  */
@@ -24,4 +24,4 @@ app.post('/jira/:type(github)/:action(complete_subtask)/:repo/:base/:head', hand
 
 
 // Start server
-app.listen(443);
+app.listen(4444);

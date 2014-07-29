@@ -37,7 +37,7 @@ function RequestGitHub() {
          * @param requestParams
          */
         createPullRequest: function (requestParams) {
-            this.client.createPullRequest(requestParams.repo, requestParams.head, requestParams.base, requestParams.title, requestParams.description);
+            this.client.createPullRequest(requestParams.repo, requestParams.base, 'title', 'description');
         },
 
         /**

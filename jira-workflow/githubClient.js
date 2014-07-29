@@ -36,15 +36,18 @@ function GitHubClient() {
          * complete the subtask: delete the subtask branch if it has been fully merged with the story
          *
          * @param {string} repo the name if the repository
-         * @param {string} base the base branch (story branch)
          * @param {string} head the head branch (subtask branch)
          */
-        completeSubTask: function(repo, base, head) {
+        completeSubTask: function(repo, head) {
 
-            if (this.isBranchMerged('ticketscript', base, head)) {
+            console.log(repo + ' ' + head);
+            // console.log('base is ' + base);
+            githubClient.getParentIssue(head, repo);
+
+            /*if (this.isBranchMerged('ticketscript', base, head)) {
 
                 this.deleteBranch('ticketscript', repo, head);
-            }
+            }*/
         },
 
         /**
@@ -70,6 +73,8 @@ function GitHubClient() {
                 auth: this.USERNAME + ':' + this.PASSWORD
 
             };
+
+            console.log(options);
 
             var req = https.request(options, function (res) {
 
@@ -114,6 +119,8 @@ function GitHubClient() {
 
             };
 
+            console.log(options);
+
             var req = https.request(options, function (res) {
 
                 var stringResponse = '';
@@ -125,9 +132,11 @@ function GitHubClient() {
 
                     var parsedResponse = JSON.parse(stringResponse);
                     if (parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0) {
-
+                        console.log('is is merged');
                         isMerged = true;
+                        githubClient.deleteBranch('ticketscript', repo, head);
                     } else {
+                        console.log('it is not merged');
                         isMerged = false;
                     }
                 });
@@ -180,6 +189,55 @@ function GitHubClient() {
             });
             req.end();
         },
+
+        getParentIssue: function (issueKey, repo) {
+
+
+            var issueKey,
+                repo;
+
+            var parentKey = 'fff';
+
+            var options = {
+                hostname: Config.atlassian.hostname,
+                path: '/rest/api/latest/issue/'+issueKey+'.json',
+                method: 'GET',
+                agent: false,
+                auth: 'john:onetwothree'
+            };
+
+            console.log(options);
+
+            var stringResponse = '';
+            var req = https.request(options, function (res) {
+
+                res.on('data', function (d) {
+
+                    stringResponse += d.toString();
+                });
+
+                req.on('error', function(err) {
+                    console.log(err);
+                });
+
+                res.on('end', function (d) {
+
+                    var parsedResponse = JSON.parse(stringResponse);
+                    //console.log(parsedResponse);
+                    parentKey = parsedResponse['fields']['parent']['key'];
+                    console.log(parentKey);
+                    githubClient.setHeadBranch(parentKey)
+                    //githubClient.asyncPullRequest(repo, issueKey, title, description);
+                    if (githubClient.isBranchMerged('ticketscript', 'ticketscript', parentKey, issueKey)) {
+
+                        console.log('gonna delete the branch now . . .repo: ' + repo + ' issue key: ' + issueKey);
+                        //githubClient.deleteBranch('ticketscript', repo, issueKey);
+                    }
+                });
+            });
+            req.end();
+        },
+
 
         setHeadBranch: function(key) {
 

@@ -20,7 +20,7 @@ app.post('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage', handl
 
 // GitHub routes
 app.post('/jira/:type(github)/:action(create_pull_request)/:repo/:head', handler.handleRequest);
-app.post('/jira/:type(github)/:action(complete_subtask)/:repo/:base/:head', handler.handleRequest);
+app.post('/jira/:type(github)/:action(complete_subtask)/:repo/:head', handler.handleRequest);
 
 
 // Start server

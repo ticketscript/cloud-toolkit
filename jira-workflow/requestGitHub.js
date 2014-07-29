@@ -1,5 +1,5 @@
 var errorMessage = require('./errorMessages');
-var client = require('./githubClient');
+var GitHubClient = require('./githubClient');
 
 /*
  * ConstructorRequestHandler
@@ -37,7 +37,7 @@ function RequestGitHub() {
          * @param requestParams
          */
         createPullRequest: function (requestParams) {
-            this.client.createPullRequest(requestParams.repo, requestParams.base, 'title', 'description');
+            this.client.createPullRequest(requestParams.repo, requestParams.head, 'title', 'description');
         },
 
         /**
@@ -47,7 +47,7 @@ function RequestGitHub() {
          */
         completeSubtask: function (requestParams) {
 
-            this.client.completeSubtask(requestParams.repo, requestParams.base, requestParams.head);
+            this.client.completeSubtask(requestParams.repo, requestParams.head);
         }
     }
 

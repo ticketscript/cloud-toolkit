@@ -37,8 +37,8 @@ rds_get_instance_status() {
 
 	# Get parameter status
 	if [[ "$instance_info" =~ $REGEX_PARAMETER_STATUS ]]; then
-                instance_paramstatus="${BASH_REMATCH[1]}"
-        fi
+		instance_paramstatus="${BASH_REMATCH[1]}"
+	fi
 
 }
 

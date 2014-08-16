@@ -23,12 +23,12 @@ case "$instance_status" in
 	"DBInstanceNotFound")
 
 		echo
-		echo "Creating new instance from dbs3 snapshot"
+		echo "Creating new instance from $SNAPSHOT snapshot"
 
 		# Create snapshot
 		do_create_snapshot
 
-		# Restore acceptance database from snapshot
+		# Restore target database from snapshot
 		rds-restore-db-instance-from-db-snapshot \
 		  --db-snapshot-identifier "$SNAPSHOT" \
 		  --db-instance-identifier "$INSTANCE" \
@@ -69,7 +69,7 @@ if [ "$instance_paramgroup" != "$INSTANCE_PARAM_GROUP" ]; then
 
 	echo -n "Modifying DB instance $INSTANCE"
 
-	# Migrate acceptance database params and database instance type
+	# Migrate target database params and database instance type
 	rds-modify-db-instance \
 	  --db-instance-identifier "$INSTANCE" \
 	  --db-parameter-group-name "$INSTANCE_PARAM_GROUP" \

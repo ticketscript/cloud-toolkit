@@ -79,8 +79,8 @@ rds_create_snapshot() {
 		exit 1
 	fi
 
-	# Create RDS snapshot from DBS3
-	rds-create-db-snapshot -i dbs3 -s "$SNAPSHOT"
+	# Create RDS snapshot
+	rds-create-db-snapshot -i $SNAPSHOT_INSTANCE -s "$SNAPSHOT"
 }
 
 rds_remove_snapshot() {

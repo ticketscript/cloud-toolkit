@@ -19,7 +19,7 @@ case "$instance_status" in
 
 	"available")
 	
-		# Backup user data in ts2acceptance database first
+		# Backup user data in target database first
 		./backup-user-data.sh $DATABASE_NAME $DATABASE_HOST $DATABASE_OFFSET 1>$DATABASE_USERDATA_SQL_FILE
 
 		if [ "$?" -gt 0 ]; then 
@@ -27,7 +27,7 @@ case "$instance_status" in
 			exit 1
 		fi
 
-		# Destroy acceptance database
+		# Destroy target database
 		./destroy-db-instance.sh  $INSTANCE
 
 		if [ "$?" -gt 0 ]; then
@@ -61,7 +61,7 @@ case "$instance_status" in
 
 esac
 
-# Restore acceptance database from snapshot
+# Restore target database from snapshot
 ./restore-db-from-slave.sh $INSTANCE
 
 if [ "$?" -gt 0 ]; then 
@@ -78,7 +78,7 @@ mysql -h $DATABASE_HOST $DATABASE_NAME < $DIR/post-migration-tweaks.sql 1>/dev/n
 # Execute database migration files
 ./execute-migration.sh
 
-# Restore user data in ts2acceptance database
+# Restore user data in target database
 mysql -h $DATABASE_HOST $DATABASE_NAME <$DATABASE_USERDATA_SQL_FILE 1>/dev/null
 
 # Clean exit!

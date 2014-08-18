@@ -1,8 +1,11 @@
+#!/bin/bash
+
 REGEX_STATUS="<Status>(.*)</Status>"
 REGEX_INSTANCE_STATUS="<DBInstanceStatus>(.*)</DBInstanceStatus>"
 REGEX_CODE="<Code>(.*)</Code>"
 REGEX_PROGRESS="<PercentProgress>([0-9]+)</PercentProgress>"
 REGEX_INSTANCE_PARAMGROUP="<DBParameterGroupName>(.*)</DBParameterGroupName>"
+REGEX_PARAMETER_STATUS="<ParameterApplyStatus>(.*)</ParameterApplyStatus>"
 
 #
 # Common RDS functions
@@ -31,6 +34,12 @@ rds_get_instance_status() {
 	if [[ "$instance_info" =~ $REGEX_INSTANCE_PARAMGROUP ]]; then
 		instance_paramgroup="${BASH_REMATCH[1]}"
 	fi
+
+	# Get parameter status
+	if [[ "$instance_info" =~ $REGEX_PARAMETER_STATUS ]]; then
+		instance_paramstatus="${BASH_REMATCH[1]}"
+	fi
+
 }
 
 rds_get_snapshot_status() {
@@ -60,12 +69,13 @@ rds_get_snapshot_status() {
 
 rds_wait_state() {
 
-	INSTANCE_WAIT_STATE="creating|modifying|rebooting|backing-up|deleting"
+	INSTANCE_WAIT_STATE="creating|modifying|rebooting|backing-up|deleting|applying"
 
 	# Check status and wait until the instance is available again
 	rds_get_instance_status
 
-	while [[ "$instance_status" =~ $INSTANCE_WAIT_STATE ]]; do
+	while [[ "$instance_status" =~ $INSTANCE_WAIT_STATE  ||  "$instance_paramstatus" =~ $INSTANCE_WAIT_STATE ]]
+	 do
 		echo -n "."
 		rds_get_instance_status
 		sleep 25

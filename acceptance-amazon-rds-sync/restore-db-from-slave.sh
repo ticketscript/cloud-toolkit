@@ -73,7 +73,8 @@ if [ "$instance_paramgroup" != "$INSTANCE_PARAM_GROUP" ]; then
 	rds-modify-db-instance \
 	  --db-instance-identifier "$INSTANCE" \
 	  --db-parameter-group-name "$INSTANCE_PARAM_GROUP" \
-	  --vpc-security-group-ids "$INSTANCE_VPC_SECURITY_GROUPS"
+	  --vpc-security-group-ids "$INSTANCE_VPC_SECURITY_GROUPS" \
+	  --apply-immediately
 
 	# Wait for modifications to complete
 	rds_wait_state
@@ -82,7 +83,7 @@ fi
 # Reboot instance to apply modifications
 echo -n "Rebooting DB instance $INSTANCE"
 
-rds-reboot-db-instance ts2acceptance
+rds-reboot-db-instance $INSTANCE
 
 # Wait for instance to become available again
 rds_wait_state

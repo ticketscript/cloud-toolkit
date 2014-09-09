@@ -3,15 +3,30 @@
  */
 var Config = Config || {};
 
+/**
+ * App settings
+ */
+Config.app = {};
+Config.app.port = 4444;
+
+/**
+ * JIRA Bamboo settings
+ */
 Config.atlassian = {};
 
-Config.atlassian.hostname = 'yourHostname';
+Config.atlassian.hostname = 'https://myhostname.atlassian.net';
 Config.atlassian.username = 'yourUsername';
 Config.atlassian.pass = 'yourPassword';
 
-/**
- * for customizing the path to your atlassian rest api call
- */
+// Custom prefix
 Config.atlassian.pathPrefix = '/pathPrefix';
+
+/**
+ * GitHub settings
+ */
+Config.github = {};
+Config.github.hostname= 'api.github.com';
+Config.github.username = 'yourUsername';
+Config.github.pass= 'yourPassword';
 
 module.exports = Config;

@@ -14,7 +14,8 @@ var app = express();
 app.use(app.router);
 
 
-// Bamboo route
+// Bamboo routes
+app.post('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project', handler.handleRequest);
 app.post('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage', handler.handleRequest);
 
 
@@ -24,4 +25,4 @@ app.post('/jira/:type(github)/:action(complete_subtask)/:repo/:head', handler.ha
 
 
 // Start server
-app.listen(443);
+app.listen(4444);

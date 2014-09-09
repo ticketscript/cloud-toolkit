@@ -29,17 +29,18 @@ RequestHandler.prototype.handleRequest = function (request, response) {
 
             case 'bamboo':
                 var handler = new requestBamboo(request.params.issueKey);
-
-                // Get request object
-                responseJson.result = handler.handleAction(request.params.action, request.params);
                 break;
+
             case 'github':
                 var handler = new requestGitHub();
-                responseJson.result = handler.handleAction(request.params.action, request.params);
                 break;
+
             default:
                 throw new Error('Unknown handler type: ' + request.params.type);
         }
+
+        // Handle the request
+        responseJson.result = handler.handleAction(request.params.action, request.params);
 
     } catch (err) {
         if (typeof err.code == "integer") {

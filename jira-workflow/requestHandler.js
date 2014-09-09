@@ -1,8 +1,8 @@
 /*
  * Factory for incoming HTTP requests
  */
-var requestBamboo = require("./requestBamboo");
-var requestGitHub = require("./requestGitHub");
+var requestBamboo   = require("./requestBamboo");
+var requestGitHub   = require("./requestGitHub");
 
 
 function RequestHandler() {
@@ -24,7 +24,6 @@ RequestHandler.prototype.handleRequest = function (request, response) {
     try {
 
         // Call selected request handler
-
         switch (request.params.type) {
 
             case 'bamboo':

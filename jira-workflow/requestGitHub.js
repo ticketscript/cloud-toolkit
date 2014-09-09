@@ -47,7 +47,7 @@ function RequestGitHub() {
          */
         completeSubtask: function (requestParams) {
 
-            this.client.completeSubtask(requestParams.repo, requestParams.head);
+            this.client.completeSubTask(requestParams.repo, requestParams.head);
         }
     }
 

@@ -10,7 +10,7 @@ DIR=`dirname $0`
 source $DIR/config
 
 # Reset 'migration' folder to origin/master
-sudo -u ticketwww sh -c "cd $DATABASE_MIGRATION_SOURCE_DIR ; git stash clear && git stash save ; git fetch -q origin && git checkout -q origin/master"
+cd $DATABASE_MIGRATION_SOURCE_DIR ; git stash clear && git stash save ; git fetch -q origin && git checkout -q origin/master
 
 # Split file names on newline
 IFS=$'\n'
@@ -32,4 +32,4 @@ for sql_file_path in `ls -1 $DATABASE_MIGRATION_TARGET_DIR/*.sql`; do
 done
 
 # Reset Git working folder to previous branch
-sudo -u ticketwww sh -c "cd $DATABASE_MIGRATION_SOURCE_DIR && git checkout -q - && git stash pop"
+cd $DATABASE_MIGRATION_SOURCE_DIR && git checkout -q - && git stash pop

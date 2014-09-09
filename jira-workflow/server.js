@@ -16,6 +16,7 @@ app.use(app.router);
 
 // Bamboo route
 app.post('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage', handler.handleRequest);
+app.post('/jira/:issueKey/:type(bamboo)/:action(testing)/:project/:stage', handler.handleRequest);
 
 
 // GitHub routes

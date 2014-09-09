@@ -18,6 +18,7 @@ function BambooClient() {
         buildPlanName: null,
         branchName: null,
         buildPlanShortKey: null,
+        buildPlanStage: null,
 
         /**
          * trigger the build service
@@ -35,8 +36,9 @@ function BambooClient() {
 
             this.branchName = branch;
             this.buildPlanName = planName;
+            this.buildPlanStage = stage;
             console.log('Triggered Bamboo project ' + planName + ' - ' + stage
-                + ' for branch ' + branch);
+                + ' for branch ' + branch + 'and for stage' + stage);
 
             this.retrievePlanBranches('GET', Config.atlassian.pathPrefix + '/rest/api/latest/plan/' + planName + '.json?expand=branches&max-results=1000');
         },
@@ -95,6 +97,14 @@ function BambooClient() {
                         console.log("queueing " + bambooClient.buildPlanName + '/branch/' + bambooClient.branchName);
                         bambooClient.queuePlanBranch('POST', Config.atlassian.pathPrefix +
                             '/rest/api/latest/queue/TSP-' + plan['shortKey'] + '.json');
+
+                    }  else if (bambooClient.buildPlanName == 'TSP-TSPU') {
+                        // the branch exists, so queue it for the testing stage
+                        var plan = bambooClient.fetchPlan(stringResponse);
+
+                        console.log("queueing " + bambooClient.buildPlanName + '/branch/' + bambooClient.branchName + ' stage ' + bambooClient.buildPlanStage);
+                        bambooClient.queuePlanBranch('POST', Config.atlassian.pathPrefix +
+                            '/rest/api/latest/queue/TSP-' + plan['shortKey'] + '.json?stage=' + bambooClient.buildPlanStage + '&executeAllStages=false');
 
                     } else {
                         console.log('plan already exists');

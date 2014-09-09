@@ -22,10 +22,6 @@ function RequestBamboo(issueKey) {
 				case 'trigger':
 					this.triggerProject(requestParams);
 					break;
-                                case 'testing':
-                                        this.triggerProject(requestParams);
-                                        break;
-
 				default:
 					throw errorMessage.invalidRequest('Unknown bamboo action: ' + action);
 			}

@@ -46,23 +46,15 @@ function BambooClient() {
             		console.log('Creating ' + planName + ' build plan for branch ' + branch);
 
 	                // this branch does not exist, so let's register the branch first
-	                self.call(
-	                	'PUT',
-	                    '/rest/api/latest'
-	                    	+ '/plan/' + planName 
-							+ '/branch/' + branch + '.json'
-							+ '?vcsBranch='+ branch,
-	                    null,
-	                    function(buildPlanBranch) {
+                    self.registerPlanBranch(planName, branch, function(buildPlanBranch) {
 
-	                    	if (!buildPlanBranch) {
-	                    		throw new exception('Failed to find branch ' + branch + ' after adding it to plan ' + planName);
-	                    	}
+                    	if (!buildPlanBranch) {
+                    		throw new exception('Failed to find branch ' + branch + ' after adding it to plan ' + planName);
+                    	}
 
-	                    	// Queue the build
-                    		self.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
-	                    }
-	                );
+                    	// Queue the build
+                		bambooClient.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
+                    });
 	            } else {
 	            	console.log('Found existing ' + planName + ' build plan for branch ' + branch);
 
@@ -104,6 +96,24 @@ function BambooClient() {
                     return buildPlanBranch;
                 }
             }
+        },
+
+        /**
+         * api call to register a branch in an existing build plan
+         * @param {string} build plan name
+         * @param {string} branch name
+         * @param {function} callback
+         */
+        registerPlanBranch: function(planName, branch, callback) {
+            var planName, branch, callback;
+
+            var url = '/rest/api/latest'
+                    + '/plan/' + planName 
+                    + '/branch/' + branch + '.json'
+                    + '?vcsBranch='+ branch;
+
+            // register branch
+            bambooClient.call('PUT', url, null, callback);
         },
 
         /**

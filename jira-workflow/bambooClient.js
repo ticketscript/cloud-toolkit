@@ -78,12 +78,12 @@ function BambooClient() {
          * @param {string} build plan name
          * @param {function} callback function for parsed response
          */
-        retrievePlanBranches: function(buildPlanName, callback) {
+        retrievePlanBranches: function(2, callback) {
         	var buildPlanName, callback;
         	var url = '/rest/api/latest' 
         			+ '/plan/' + buildPlanName + '.json?expand=branches&max-results=1000';
 
-        	bambooClient.call('GET', url, null, callback);
+        	self.call('GET', url, null, callback);
         },
 
         /**
@@ -129,7 +129,7 @@ function BambooClient() {
         								 + ' build for branch ' + branchName);
 
         	// Queue build
-            bambooClient.call('POST', planBuildUrl, postData);
+            self.call('POST', planBuildUrl, postData);
         },
 
         /**
@@ -148,11 +148,11 @@ function BambooClient() {
                 callback;
 
             var options = {
-	                hostname:   bambooClient.HOSTNAME,
+	                hostname:   self.HOSTNAME,
 	                path: 		Config.atlassian.pathPrefix + url,
 	                method: 	method,
 	                agent: 		false,
-	                auth: 		bambooClient.AUTHCREDENTIALS,
+	                auth: 		self.AUTHCREDENTIALS,
 	                headers: 	{
 				                	'X-Atlassian-Token': 'nocheck',
 				                    'Content-Length': body.length
@@ -209,3 +209,4 @@ function BambooClient() {
 };
 
 module.exports = BambooClient
+c

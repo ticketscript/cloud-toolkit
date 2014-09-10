@@ -6,7 +6,7 @@ var Config       = require('./config.js');
  */
 function BambooClient() {
 
-    var bambooClient = {
+    var self = {
 
         /**
          * hostname && auth credentials, from an git-ignored config object
@@ -26,13 +26,11 @@ function BambooClient() {
             var planName,
                 branch,
                 stage = stage || '';
-
-            var self = this;
-
+            
             console.log('Trigger received for Bamboo project ' + planName + ' for branch ' + branch + ' and for stage' + stage);
 
             // Retrieve plan and parse response
-            this.retrievePlanBranches(planName, function(parsedResponse) {
+            self.retrievePlanBranches(planName, function(parsedResponse) {
 
             	var parsedResponse, 
             		buildPlanBranch;
@@ -48,12 +46,8 @@ function BambooClient() {
 	                // this branch does not exist, so let's register the branch first
                     self.registerPlanBranch(planName, branch, function(buildPlanBranch) {
 
-                    	if (!buildPlanBranch) {
-                    		throw new exception('Failed to find branch ' + branch + ' after adding it to plan ' + planName);
-                    	}
-
                     	// Queue the build
-                		bambooClient.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
+                		self.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
                     });
 	            } else {
 	            	console.log('Found existing ' + planName + ' build plan for branch ' + branch);
@@ -75,7 +69,7 @@ function BambooClient() {
         	var url = '/rest/api/latest' 
         			+ '/plan/' + buildPlanName + '.json?expand=branches&max-results=1000';
 
-        	bambooClient.call('GET', url, null, callback);
+        	self.call('GET', url, null, callback);
         },
 
         /**
@@ -113,7 +107,7 @@ function BambooClient() {
                     + '?vcsBranch='+ branch;
 
             // register branch
-            bambooClient.call('PUT', url, null, callback);
+            self.call('PUT', url, null, callback);
         },
 
         /**
@@ -139,7 +133,7 @@ function BambooClient() {
         								 + ' build for branch ' + branchName);
 
         	// Queue build
-            bambooClient.call('POST', planBuildUrl, postData);
+            self.call('POST', planBuildUrl, postData);
         },
 
         /**
@@ -158,11 +152,11 @@ function BambooClient() {
                 callback;
 
             var options = {
-	                hostname:   bambooClient.HOSTNAME,
+	                hostname:   self.HOSTNAME,
 	                path: 		Config.atlassian.pathPrefix + url,
 	                method: 	method,
 	                agent: 		false,
-	                auth: 		bambooClient.AUTHCREDENTIALS,
+	                auth: 		self.AUTHCREDENTIALS,
 	                headers: 	{
 				                	'X-Atlassian-Token': 'nocheck',
 				                    'Content-Length': body.length
@@ -215,7 +209,7 @@ function BambooClient() {
         }
     }
 
-    return bambooClient;
+    return self;
 };
 
 module.exports = BambooClient

@@ -14,7 +14,7 @@ Config.app.port = 4444;
  */
 Config.atlassian = {};
 
-Config.atlassian.hostname = 'https://myhostname.atlassian.net';
+Config.atlassian.hostname = 'yourHostname.atlassian.net';
 Config.atlassian.username = 'yourUsername';
 Config.atlassian.pass = 'yourPassword';
 

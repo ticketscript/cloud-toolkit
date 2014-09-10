@@ -42,6 +42,8 @@ RequestHandler.prototype.handleRequest = function (request, response) {
         responseJson.result = handler.handleAction(request.params.action, request.params);
 
     } catch (err) {
+        console.error(err);
+
         if (typeof err.code == "integer") {
             responseCode = err.code;
         } else {

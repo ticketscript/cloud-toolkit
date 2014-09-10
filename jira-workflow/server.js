@@ -13,18 +13,16 @@ var RequestHandler = require('./requestHandler');
 var handler = new RequestHandler();
 
 var app = express();
-
-// Activate router
-app.use(app.router);
+//var router = express.router();
 
 // Bamboo routes
-app.post('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project', handler.handleRequest);
-app.post('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage', handler.handleRequest);
+app.route('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project').post(handler.handleRequest);
+app.route('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage').post(handler.handleRequest);
 
 
 // GitHub routes
-app.post('/jira/:type(github)/:action(create_pull_request)/:repo/:head', handler.handleRequest);
-app.post('/jira/:type(github)/:action(complete_subtask)/:repo/:head', handler.handleRequest);
+app.route('/jira/:type(github)/:action(create_pull_request)/:repo/:head').post(handler.handleRequest);
+app.route('/jira/:type(github)/:action(complete_subtask)/:repo/:head').post(handler.handleRequest);
 
 // Start server
 app.listen(Config.app.port);

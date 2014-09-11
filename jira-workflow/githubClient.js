@@ -51,11 +51,16 @@ function GitHubClient() {
 
         /**
          * create a branch in git based on master
+         * 
+         * @param {string} owner      the repo owner (organisation)
+         * @param {string} repo       the name of the repository
+         * @param {string} branchName the name to be deleted
          */
         createBranch: function(owner, repo, branchName) {
-            var owner, repo, branchName, reference, master, branch;
+            var owner, repo, branchName,
+                reference, master, branch;
 
-            // Retrieve new branch SHA            
+            // Check if branch already exists first
             self.retrieveReference(owner, repo, 'heads/' + branchName, function(branch) {
 
                 if (branch.ref) {

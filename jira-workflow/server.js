@@ -5,23 +5,26 @@
  *   /jira/   -- send POST requests from JIRA's hooks here
  */
 var express = require("express");
+
+var Config = require('./config.js')
 var RequestHandler = require('./requestHandler');
 
 // Init request handlers
 var handler = new RequestHandler();
 
 var app = express();
-app.use(app.router);
+//var router = express.router();
 
-
-// Bamboo route
-app.post('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage', handler.handleRequest);
+// Bamboo routes
+app.route('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project').post(handler.handleRequest);
+app.route('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage').post(handler.handleRequest);
 
 
 // GitHub routes
-app.post('/jira/:type(github)/:action(create_pull_request)/:repo/:head', handler.handleRequest);
-app.post('/jira/:type(github)/:action(complete_subtask)/:repo/:head', handler.handleRequest);
-
+app.route('/jira/:type(github)/:action(create_pull_request)/:repo/:head').post(handler.handleRequest);
+app.route('/jira/:type(github)/:action(complete_subtask)/:repo/:head').post(handler.handleRequest);
 
 // Start server
-app.listen(443);
+app.listen(Config.app.port);
+
+console.log('Listening on port ' + Config.app.port);

@@ -1,8 +1,8 @@
 /*
  * Factory for incoming HTTP requests
  */
-var requestBamboo = require("./requestBamboo");
-var requestGitHub = require("./requestGitHub");
+var requestBamboo   = require("./requestBamboo");
+var requestGitHub   = require("./requestGitHub");
 
 
 function RequestHandler() {
@@ -24,24 +24,26 @@ RequestHandler.prototype.handleRequest = function (request, response) {
     try {
 
         // Call selected request handler
-
         switch (request.params.type) {
 
             case 'bamboo':
                 var handler = new requestBamboo(request.params.issueKey);
-
-                // Get request object
-                responseJson.result = handler.handleAction(request.params.action, request.params);
                 break;
+
             case 'github':
                 var handler = new requestGitHub();
-                responseJson.result = handler.handleAction(request.params.action, request.params);
                 break;
+
             default:
                 throw new Error('Unknown handler type: ' + request.params.type);
         }
 
+        // Handle the request
+        responseJson.result = handler.handleAction(request.params.action, request.params);
+
     } catch (err) {
+        console.error(err);
+
         if (typeof err.code == "integer") {
             responseCode = err.code;
         } else {

@@ -1,6 +1,5 @@
-var Config = require('./config')
-var https = require('https');
-//var errorMessage = require('./errorMessages');
+var https        = require('https');
+var Config       = require('./config.js');
 
 /*
  * Constructor

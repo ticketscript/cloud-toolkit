@@ -177,7 +177,7 @@ function BambooClient() {
                     if (res.statusCode == 200) {
 	            		response += chunk;
                     } else {
-                        console.error('Request failed', res);
+                        console.error('Request failed: ' + res.headers.status);
                     }
                 });
 

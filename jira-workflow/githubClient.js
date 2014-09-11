@@ -59,7 +59,7 @@ function GitHubClient() {
          */
         createBranch: function(owner, repo, branchName, reference) {
             var owner, repo, branchName, reference, 
-                branchReference, branchStart;
+                branchReference, branchStart, baseReference;
 
             // Check if branch already exists first
             self.retrieveReference(owner, repo, 'heads/' + branchName, function(branchReference) {
@@ -69,13 +69,26 @@ function GitHubClient() {
                     return;
                 }
 
+                console.log('Creating Branch ' + branchName + ' on ' + owner + '/' + repo + ' from ' + reference);
+
                 // Retrieve master branch SHA
-                self.retrieveReference(owner, repo, reference, function(branchReference) {
+                self.retrieveReference(owner, repo, reference, function(baseReference) {
+                    if (!baseReference.object) {
+                        console.error('Reference ' + reference + ' does not exist');
+                        return;
+                    }
 
-                    console.log(reference + ' is at ' + branchReference.object.sha);
-                    console.log('Creating Branch ' + branchName + ' on ' + owner + '/' + repo);
+                    console.log(reference + ' is at ' + baseReference.object.sha);
 
-                    self.call('POST', '/repos/' + owner + '/' + repo + '/git/refs', branchReference.object);
+                    // Create new branch base reference
+                    branchReference = {
+                        'ref': 'refs/heads/' + branchName,
+                        'sha': baseReference.object.sha
+                    };
+
+                    self.call('POST', '/repos/' + owner + '/' + repo + '/git/refs', branchReference, function() {
+                        console.log(branchReference.ref + ' created');
+                    });
                 });
             });
         },
@@ -284,7 +297,7 @@ function GitHubClient() {
             var method,
                 path,
                 body = body ? JSON.stringify(body) : '',
-                callback;
+                callback = callback || function() { };
 
             var headers = {
                 'Content-Type': 'application/json',
@@ -317,24 +330,22 @@ function GitHubClient() {
                 });
 
                 // Add response handler
-                if (callback) {
+                // Response handler
+                res.on('end', function() {
 
-                    // Response handler
-                    res.on('end', function() {
+                    if (res.statusCode >= 200 && res.statusCode < 300) {
 
-                        if (res.statusCode >= 200 && res.statusCode < 300) {
-                            var parsedResponse = JSON.parse(response);
+                        var parsedResponse = JSON.parse(response);
 
-                            // Pass parsed JSON response to callback function
-                            callback(parsedResponse);
+                        // Pass parsed JSON response to callback function
+                        callback(parsedResponse);
 
-                        } else if (res.statusCode == 404) {
-                            callback({});
-                        } else {
-                            console.error('Request failed', res.statusCode, res.headers);
-                        }
-                    });
-                }
+                    } else if (res.statusCode == 404) {
+                        callback({});
+                    } else {
+                        console.error('Request failed: ' + res.headers.status);
+                    }
+                });
             });
 
             // Send request body

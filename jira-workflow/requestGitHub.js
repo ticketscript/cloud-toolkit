@@ -9,6 +9,22 @@ function RequestGitHub() {
     var self = {
 
         client: GitHubClient(),
+        issue: null,
+
+        getIssue: function() {
+            // Check if issue exists
+            if (typeof self.issue != 'object') {
+                throw errorMessage.invalidRequest('Issue details are missing in POST request body');
+            }
+
+            return self.issue;
+        },
+
+        setIssue: function (issue) {
+            var issue;
+
+            self.issue = issue;
+        },
 
         /**
          * handle the action
@@ -40,9 +56,26 @@ function RequestGitHub() {
          * @param requestParams
          */
         createBranch: function (requestParams) {
-            // Fork from branch or master (default) ?
-            var reference = 'heads/' + (requestParams.forkFrom ? requestParams.forkFrom : 'master');
+            var requestParams, reference;
 
+            switch (requestParams.forkFrom) {
+
+                case undefined:
+                    // Fork from master (default)
+                    reference = 'heads/master';
+                    break;
+
+                case 'parent':
+                    // Fork from issues parent branch
+                    reference = 'heads/' + this.getIssue().fields.parent.key;
+                    break;
+
+                default:
+                    reference = 'heads/' + requestParams.forkFrom;
+
+            }
+
+            // Create branch
             this.client.createBranch(requestParams.owner, requestParams.repo, requestParams.branchName, reference);
         },
 

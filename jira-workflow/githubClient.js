@@ -6,7 +6,7 @@ var Config       = require('./config.js');
  */
 function GitHubClient() {
 
-    var githubClient = {
+    var self = {
 
         headBranch: 'v',
 
@@ -28,7 +28,7 @@ function GitHubClient() {
         createPullRequest: function (repo, base, title, description) {
 
             // console.log('base is ' + base);
-            githubClient.getIssue(base, repo, title, description);
+            self.getIssue(base, repo, title, description);
         },
 
         /**
@@ -41,12 +41,56 @@ function GitHubClient() {
 
             console.log(repo + ' ' + head);
             // console.log('base is ' + base);
-            githubClient.getParentIssue(head, repo);
+            self.getParentIssue(head, repo);
 
             /*if (this.isBranchMerged('ticketscript', base, head)) {
 
                 this.deleteBranch('ticketscript', repo, head);
             }*/
+        },
+
+        /**
+         * create a branch in git based on master
+         * 
+         * @param {string} owner      the repo owner (organisation)
+         * @param {string} repo       the name of the repository
+         * @param {string} branchName the name to be deleted
+         */
+        createBranch: function(owner, repo, branchName) {
+            var owner, repo, branchName,
+                reference, master, branch;
+
+            // Check if branch already exists first
+            self.retrieveReference(owner, repo, 'heads/' + branchName, function(branch) {
+
+                if (branch.ref) {
+                    console.log('Branch ' + branchName + ' already exists');
+                    return;
+                }
+
+                // Retrieve master branch SHA
+                self.retrieveReference(owner, repo, 'heads/master', function(master) {
+
+                    console.log('Master branch is at ' + master.object.sha);
+
+                    var branchReference = {
+                        'ref': 'refs/heads/' + branchName,
+                        'sha': master['object']['sha']
+                    };
+
+                    console.log('Creating Branch ' + branchName + ' on ' + owner + '/' + repo);
+
+                    self.call('POST', '/repos/' + owner + '/' + repo + '/git/refs', branchReference);
+                });
+            });
+        },
+
+        /**
+         * Retrieve GitHub reference (branch/tag/commit)
+         */
+        retrieveReference: function(owner, repo, reference, callback) {
+            var owner, repo, branchName, reference;
+            self.call('GET', '/repos/' + owner + '/' + repo + '/git/refs/' + reference, null, callback);
         },
 
         /**
@@ -57,36 +101,9 @@ function GitHubClient() {
          * @param {string} branchName the name to be deleted
          */
         deleteBranch: function (owner, repo, branchName) {
+            var owner, repo, branchName;
 
-            var headers = {
-                'Content-Type': 'application/json',
-                'Content-Length': 0,
-                'user-agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
-            };
-
-            var options = {
-                hostname: this.HOSTNAME,
-                path: '/repos/'+owner+'/'+repo+'/git/refs/heads/'+branchName,
-                method: 'DELETE',
-                headers: headers,
-                auth: this.USERNAME + ':' + this.PASSWORD
-
-            };
-
-            console.log(options);
-
-            var req = https.request(options, function (res) {
-
-                var stringResponse = '';
-                res.on('data', function (d) {
-                    stringResponse += d.toString();
-                });
-
-                res.on('end', function (d) {
-                });
-
-            });
-            req.end();
+            self.call('DELETE', '/repos/' + owner + '/' + repo + '/git/refs/heads/' + branchName);
         },
 
         /**
@@ -103,45 +120,16 @@ function GitHubClient() {
 
             var isMerged = false;
 
-            var headers = {
-                'Content-Type': 'application/json',
-                'Content-Length': 0,
-                'user-agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
-            };
-
-            var options = {
-                hostname: this.HOSTNAME,
-                path: '/repos/'+owner+'/'+repo+'/compare/'+base+'...'+head,
-                method: 'GET',
-                headers: headers,
-                auth: this.USERNAME + ':' + this.PASSWORD
-
-            };
-
-            console.log(options);
-
-            var req = https.request(options, function (res) {
-
-                var stringResponse = '';
-                res.on('data', function (d) {
-                    stringResponse += d.toString();
-                });
-
-                res.on('end', function (d) {
-
-                    var parsedResponse = JSON.parse(stringResponse);
-                    if (parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0) {
-                        console.log('is is merged');
-                        isMerged = true;
-                        githubClient.deleteBranch('ticketscript', repo, head);
-                    } else {
-                        console.log('it is not merged');
-                        isMerged = false;
-                    }
-                });
-
+            self.call('GET', '/repos/'+owner+'/'+repo+'/compare/'+base+'...'+head, function(parsedResponse) {
+                if (parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0) {
+                    console.log('is is merged');
+                    isMerged = true;
+                    self.deleteBranch('ticketscript', repo, head);
+                } else {
+                    console.log('it is not merged');
+                    isMerged = false;
+                }
             });
-            req.end();
 
             return isMerged;
         },
@@ -182,8 +170,8 @@ function GitHubClient() {
                     //console.log(parsedResponse);
                     parentKey = parsedResponse['fields']['parent']['key'];
                     console.log(parentKey);
-                    githubClient.setHeadBranch(parentKey)
-                    githubClient.asyncPullRequest(repo, issueKey, title, description);
+                    self.setHeadBranch(parentKey)
+                    self.asyncPullRequest(repo, issueKey, title, description);
                 });
             });
             req.end();
@@ -225,12 +213,12 @@ function GitHubClient() {
                     //console.log(parsedResponse);
                     parentKey = parsedResponse['fields']['parent']['key'];
                     console.log(parentKey);
-                    githubClient.setHeadBranch(parentKey)
-                    //githubClient.asyncPullRequest(repo, issueKey, title, description);
-                    if (githubClient.isBranchMerged('ticketscript', 'ticketscript', parentKey, issueKey)) {
+                    self.setHeadBranch(parentKey)
+                    //self.asyncPullRequest(repo, issueKey, title, description);
+                    if (self.isBranchMerged('ticketscript', 'ticketscript', parentKey, issueKey)) {
 
                         console.log('gonna delete the branch now . . .repo: ' + repo + ' issue key: ' + issueKey);
-                        //githubClient.deleteBranch('ticketscript', repo, issueKey);
+                        //self.deleteBranch('ticketscript', repo, issueKey);
                     }
                 });
             });
@@ -241,19 +229,19 @@ function GitHubClient() {
         setHeadBranch: function(key) {
 
             //console.log('here is  a parent ' + key);
-            githubClient.headBranch = key;
-            //console.log('ghchb: ' + githubClient.headBranch);
+            self.headBranch = key;
+            //console.log('ghchb: ' + self.headBranch);
         },
 
         asyncPullRequest: function (repo, base, title, description) {
 
-            console.log('async pull request! ' + githubClient.headBranch);
-            var message = 'merge of ' + base + ' into ' + githubClient.headBranch;
+            console.log('async pull request! ' + self.headBranch);
+            var message = 'merge of ' + base + ' into ' + self.headBranch;
 
             var data = {
                 title: message,
                 head: base,
-                base: githubClient.headBranch,
+                base: self.headBranch,
                 description: message
             };
 
@@ -287,10 +275,83 @@ function GitHubClient() {
 
             req.write(dataString);
             req.end();
+        },
+
+        /**
+         * API call to GitHub
+         *
+         * @param {string} method the https method
+         * @param {string} url the path for the API call
+         * @param {string} HTTP request body
+         * @param {function} callback function when request completes
+         */
+        call: function(method, path, body, callback) {
+            var method,
+                path,
+                body = body ? JSON.stringify(body) : '',
+                callback;
+
+            var headers = {
+                'Content-Type': 'application/json',
+                'Content-Length': body.length,
+                'user-agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
+            };
+
+            var options = {
+                hostname: self.HOSTNAME,
+                path: path,
+                method: method,
+                headers: headers,
+                auth: self.USERNAME + ':' + self.PASSWORD
+            };
+
+            // Start HTTPS request
+            var req = https.request(options, function (res) {
+
+                var res,
+                    response = '';
+
+                // Collect data chunks into response
+                res.on('data', function (chunk) {
+
+                    var chunk;
+
+                    if (res.statusCode >= 200 && res.statusCode < 300) {
+                        response += chunk;
+                    }
+                });
+
+                // Add response handler
+                if (callback) {
+
+                    // Response handler
+                    res.on('end', function() {
+
+                        if (res.statusCode >= 200 && res.statusCode < 300) {
+                            var parsedResponse = JSON.parse(response);
+
+                            // Pass parsed JSON response to callback function
+                            callback(parsedResponse);
+
+                        } else if (res.statusCode == 404) {
+                            callback({});
+                        } else {
+                            console.error('Request failed', res.statusCode, res.headers);
+                        }
+                    });
+                }
+            });
+
+            // Send request body
+            if (body.length) {
+                req.write(body);
+            }
+
+            req.end();
         }
     }
 
-    return githubClient;
+    return self;
 };
 
 module.exports = GitHubClient

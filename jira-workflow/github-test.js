@@ -7,6 +7,7 @@
 var GithubClient = require('./githubClient');
 
 var client = GithubClient();
+// client.createBranch('ticketscript', 'ticketscript', 'SBX-106');
 
 // client.createPullRequest('cloud-toolkit', 'TSP-johnarch01', 'TSP-johnarch02', 'fdsa', 'fdsa');
 

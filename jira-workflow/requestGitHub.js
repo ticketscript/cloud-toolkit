@@ -90,7 +90,16 @@ function RequestGitHub() {
          * @param requestParams
          */
         createPullRequest: function (requestParams) {
-            this.client.createPullRequest(requestParams.head, 'title', 'description');
+            var requestParams,
+                issue = this.getIssue();
+
+            var base = issue.fields.parent.key,
+                head = requestParams.head,
+                title = requestParams.head + issue.fields.title,
+                description = 'description';
+
+            // Create the pull request
+            this.client.createPullRequest(base, head, title, description);
         },
 
         /**
@@ -99,8 +108,17 @@ function RequestGitHub() {
          * @param requestParams
          */
         completeSubtask: function (requestParams) {
+            var requestParams,
+                base = this.getIssue().fields.parent.key,
+                head = requestParams.head;
 
-            this.client.completeSubTask(requestParams.head);
+            // Check if sub task has is fully merged into base
+            if (this.client.isBranchMerged(base, head)) {
+                // Delete sub task branch
+                this.client.deleteBranch(head);
+            } else {
+                console.error(head + ' is not fully merged with ' + base);
+            }
         }
     }
 

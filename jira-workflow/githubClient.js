@@ -14,34 +14,12 @@ function GitHubClient(owner, repo) {
         /**
          * hostname && auth credentials
          */
-        owner: owner,
-        repo: repo,
         HOSTNAME: Config.github.hostname,
         USERNAME: Config.github.username,
         PASSWORD: Config.github.pass,
 
-        /**
-         * create a pull request
-         *
-         * @param {string} base          the base branch
-         * @param {string} title         the title of the pull request
-         * @param {string} description   the description of the pull request
-         */
-        createPullRequest: function (base, title, description) {
-
-            // console.log('base is ' + base);
-            self.getIssue(base, self.repo, title, description);
-        },
-
-        /**
-         * complete the subtask: delete the subtask branch if it has been fully merged with the story
-         *
-         * @param {string} head the head branch (subtask branch)
-         * @param {string} parent issue key
-         */
-        completeSubTask: function(head, parentIssue) {
-
-        },
+        owner: owner,
+        repo: repo,
 
         /**
          * create a branch in git based on master
@@ -86,14 +64,31 @@ function GitHubClient(owner, repo) {
         },
 
         /**
-         * Retrieve GitHub reference (branch/tag/commit)
-         * 
-         * @param {string} reference    git reference to a branch, tag or commit
-         * @param {function} callback   callback function
+         * Create a new pull request
+         * @param {string} base branch
+         * @param {string} head branch
+         * @param {string} title for the pull request
+         * @param {string} description of the pull request
          */
-        retrieveReference: function(reference, callback) {
-            var branchName, reference;
-            self.call('GET', '/repos/' + self.owner + '/' + self.repo + '/git/refs/' + reference, null, callback);
+        createPullRequest: function (base, head, title, description) {
+            var base, head, title, description;
+
+            var data = {
+                title: title,
+                body: description,
+                head: head,
+                base: base,
+            };
+
+            // Send create pull request API call
+            self.call(
+                'POST',
+                '/repos/' + self.owner + '/' + self.repo + '/pulls',
+                data,
+                function(response) {
+                    console.log('Pull request created for ' + head + ' into ' + base);
+                }
+            );
         },
 
         /**
@@ -105,6 +100,17 @@ function GitHubClient(owner, repo) {
             var branchName;
 
             self.call('DELETE', '/repos/' + self.owner + '/' + self.repo + '/git/refs/heads/' + branchName);
+        },
+
+        /**
+         * Retrieve GitHub reference (branch/tag/commit)
+         * 
+         * @param {string} reference    git reference to a branch, tag or commit
+         * @param {function} callback   callback function
+         */
+        retrieveReference: function(reference, callback) {
+            var branchName, reference;
+            self.call('GET', '/repos/' + self.owner + '/' + self.repo + '/git/refs/' + reference, null, callback);
         },
 
         /**
@@ -135,147 +141,6 @@ function GitHubClient(owner, repo) {
             });
 
             return isMerged;
-        },
-
-        getIssue: function (issueKey, title, description) {
-
-
-            var issueKey,
-                base,
-                title;
-
-            var parentKey = 'fff';
-
-            var options = {
-                hostname: Config.atlassian.hostname,
-                path: '/rest/api/latest/issue/'+issueKey+'.json',
-                method: 'GET',
-                agent: false,
-                auth: 'john:onetwothree'
-            };
-
-            var stringResponse = '';
-            var req = https.request(options, function (res) {
-
-                res.on('data', function (d) {
-
-                    stringResponse += d.toString();
-                });
-
-                req.on('error', function(err) {
-                    console.log(err);
-                });
-
-                res.on('end', function (d) {
-
-                    var parsedResponse = JSON.parse(stringResponse);
-                    //console.log(parsedResponse);
-                    parentKey = parsedResponse['fields']['parent']['key'];
-                    console.log(parentKey);
-                    self.setHeadBranch(parentKey)
-                    self.asyncPullRequest(self.repo, issueKey, title, description);
-                });
-            });
-            req.end();
-        },
-
-        getParentIssue: function (issueKey) {
-
-
-            var issueKey;
-
-            var parentKey = 'fff';
-
-            var options = {
-                hostname: Config.atlassian.hostname,
-                path: '/rest/api/latest/issue/'+issueKey+'.json',
-                method: 'GET',
-                agent: false,
-                auth: 'john:onetwothree'
-            };
-
-            console.log(options);
-
-            var stringResponse = '';
-            var req = https.request(options, function (res) {
-
-                res.on('data', function (d) {
-
-                    stringResponse += d.toString();
-                });
-
-                req.on('error', function(err) {
-                    console.log(err);
-                });
-
-                res.on('end', function (d) {
-
-                    var parsedResponse = JSON.parse(stringResponse);
-                    //console.log(parsedResponse);
-                    parentKey = parsedResponse['fields']['parent']['key'];
-                    console.log(parentKey);
-                    self.setHeadBranch(parentKey)
-                    //self.asyncPullRequest(repo, issueKey, title, description);
-                    if (self.isBranchMerged('ticketscript', 'ticketscript', parentKey, issueKey)) {
-
-                        console.log('gonna delete the branch now . . .repo: ' + self.repo + ' issue key: ' + issueKey);
-                        //self.deleteBranch('ticketscript', repo, issueKey);
-                    }
-                });
-            });
-            req.end();
-        },
-
-
-        setHeadBranch: function(key) {
-
-            //console.log('here is  a parent ' + key);
-            self.headBranch = key;
-            //console.log('ghchb: ' + self.headBranch);
-        },
-
-        asyncPullRequest: function (base, title, description) {
-
-            console.log('async pull request! ' + self.headBranch);
-            var message = 'merge of ' + base + ' into ' + self.headBranch;
-
-            var data = {
-                title: message,
-                head: base,
-                base: self.headBranch,
-                description: message
-            };
-
-            console.log(data);
-
-            var dataString = JSON.stringify(data);
-
-            var headers = {
-                'Content-Type': 'application/json',
-                'Content-Length': dataString.length,
-                'user-agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
-            };
-
-            var options = {
-                hostname: this.HOSTNAME,
-                username: this.USERNAME,
-                path: '/repos/ticketscript/' + self.repo + '/pulls',
-                method: 'POST',
-                headers: headers,
-                auth: self.USERNAME + ':' + self.PASSWORD
-
-            };
-            console.log(options);
-
-            var req = https.request(options, function (res) {
-                /**
-                 * @fixme to be finished
-                 */
-                //console.log(res);
-            });
-
-            req.write(dataString);
-            req.end();
         },
 
         /**

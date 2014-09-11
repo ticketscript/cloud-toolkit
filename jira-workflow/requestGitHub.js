@@ -19,6 +19,9 @@ function RequestGitHub() {
         handleAction: function (action, requestParams) {
 
             switch (action) {
+                case 'create_branch':
+                    this.createBranch(requestParams);
+                    break;
                 case 'create_pull_request':
                     this.createPullRequest(requestParams);
                     break;
@@ -29,6 +32,15 @@ function RequestGitHub() {
                 default:
                     throw errorMessage.invalidRequest('Unknown github action: ' + action);
             }
+        },
+
+        /**
+         * create a new pull request
+         *
+         * @param requestParams
+         */
+        createBranch: function (requestParams) {
+            this.client.createBranch(requestParams.owner, requestParams.repo, requestParams.branchName);
         },
 
         /**

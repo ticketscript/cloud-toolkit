@@ -23,6 +23,7 @@ app.route('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage').post
 // GitHub routes
 app.route('/jira/:type(github)/:action/:repo/:head').post(handler.handleRequest);
 app.route('/jira/:type(github)/:action(create_branch)/:owner/:repo/:branchName').post(handler.handleRequest);
+app.route('/jira/:type(github)/:action(create_branch)/:owner/:repo/:branchName/:forkFrom(parent)').post(handler.handleRequest);
 
 // Start server
 app.listen(Config.app.port);

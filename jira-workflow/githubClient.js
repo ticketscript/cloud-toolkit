@@ -54,33 +54,28 @@ function GitHubClient() {
          * 
          * @param {string} owner      the repo owner (organisation)
          * @param {string} repo       the name of the repository
-         * @param {string} branchName the name to be deleted
+         * @param {string} branchName the name to be created
+         * @param {string} branchStart branch to fork from (default master)
          */
-        createBranch: function(owner, repo, branchName) {
-            var owner, repo, branchName,
-                reference, master, branch;
+        createBranch: function(owner, repo, branchName, reference) {
+            var owner, repo, branchName, reference, 
+                branchReference, branchStart;
 
             // Check if branch already exists first
-            self.retrieveReference(owner, repo, 'heads/' + branchName, function(branch) {
+            self.retrieveReference(owner, repo, 'heads/' + branchName, function(branchReference) {
 
-                if (branch.ref) {
+                if (branchReference.ref) {
                     console.log('Branch ' + branchName + ' already exists');
                     return;
                 }
 
                 // Retrieve master branch SHA
-                self.retrieveReference(owner, repo, 'heads/master', function(master) {
+                self.retrieveReference(owner, repo, reference, function(branchReference) {
 
-                    console.log('Master branch is at ' + master.object.sha);
-
-                    var branchReference = {
-                        'ref': 'refs/heads/' + branchName,
-                        'sha': master['object']['sha']
-                    };
-
+                    console.log(reference + ' is at ' + branchReference.object.sha);
                     console.log('Creating Branch ' + branchName + ' on ' + owner + '/' + repo);
 
-                    self.call('POST', '/repos/' + owner + '/' + repo + '/git/refs', branchReference);
+                    self.call('POST', '/repos/' + owner + '/' + repo + '/git/refs', branchReference.object);
                 });
             });
         },

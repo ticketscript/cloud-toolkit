@@ -6,7 +6,7 @@ var GitHubClient = require('./githubClient');
  */
 function RequestGitHub() {
 
-    var requestGitHub = {
+    var self = {
 
         client: GitHubClient(),
 
@@ -40,7 +40,10 @@ function RequestGitHub() {
          * @param requestParams
          */
         createBranch: function (requestParams) {
-            this.client.createBranch(requestParams.owner, requestParams.repo, requestParams.branchName);
+            // Fork from branch or master (default) ?
+            var reference = 'heads/' + (requestParams.forkFrom ? requestParams.forkFrom : 'master');
+
+            this.client.createBranch(requestParams.owner, requestParams.repo, requestParams.branchName, reference);
         },
 
         /**
@@ -63,7 +66,7 @@ function RequestGitHub() {
         }
     }
 
-    return requestGitHub;
+    return self;
 };
 
 module.exports = RequestGitHub

@@ -4,8 +4,9 @@ var Config       = require('./config.js');
 /*
  * Constructor
  */
-function GitHubClient() {
+function GitHubClient(owner, repo) {
 
+    var owner, repo;
     var self = {
 
         headBranch: 'v',
@@ -13,6 +14,8 @@ function GitHubClient() {
         /**
          * hostname && auth credentials
          */
+        owner: owner,
+        repo: repo,
         HOSTNAME: Config.github.hostname,
         USERNAME: Config.github.username,
         PASSWORD: Config.github.pass,
@@ -20,59 +23,48 @@ function GitHubClient() {
         /**
          * create a pull request
          *
-         * @param {string} repo          the repository
          * @param {string} base          the base branch
          * @param {string} title         the title of the pull request
          * @param {string} description   the description of the pull request
          */
-        createPullRequest: function (repo, base, title, description) {
+        createPullRequest: function (base, title, description) {
 
             // console.log('base is ' + base);
-            self.getIssue(base, repo, title, description);
+            self.getIssue(base, self.repo, title, description);
         },
 
         /**
          * complete the subtask: delete the subtask branch if it has been fully merged with the story
          *
-         * @param {string} repo the name if the repository
          * @param {string} head the head branch (subtask branch)
+         * @param {string} parent issue key
          */
-        completeSubTask: function(repo, head) {
+        completeSubTask: function(head, parentIssue) {
 
-            console.log(repo + ' ' + head);
-            // console.log('base is ' + base);
-            self.getParentIssue(head, repo);
-
-            /*if (this.isBranchMerged('ticketscript', base, head)) {
-
-                this.deleteBranch('ticketscript', repo, head);
-            }*/
         },
 
         /**
          * create a branch in git based on master
          * 
-         * @param {string} owner      the repo owner (organisation)
-         * @param {string} repo       the name of the repository
          * @param {string} branchName the name to be created
          * @param {string} branchStart branch to fork from (default master)
          */
-        createBranch: function(owner, repo, branchName, reference) {
-            var owner, repo, branchName, reference, 
+        createBranch: function(branchName, reference) {
+            var branchName, reference, 
                 branchReference, branchStart, baseReference;
 
             // Check if branch already exists first
-            self.retrieveReference(owner, repo, 'heads/' + branchName, function(branchReference) {
+            self.retrieveReference('heads/' + branchName, function(branchReference) {
 
                 if (branchReference.ref) {
                     console.log('Branch ' + branchName + ' already exists');
                     return;
                 }
 
-                console.log('Creating Branch ' + branchName + ' on ' + owner + '/' + repo + ' from ' + reference);
+                console.log('Creating Branch ' + branchName + ' on ' + self.owner + '/' + self.repo + ' from ' + reference);
 
                 // Retrieve master branch SHA
-                self.retrieveReference(owner, repo, reference, function(baseReference) {
+                self.retrieveReference(reference, function(baseReference) {
                     if (!baseReference.object) {
                         console.error('Reference ' + reference + ' does not exist');
                         return;
@@ -86,7 +78,7 @@ function GitHubClient() {
                         'sha': baseReference.object.sha
                     };
 
-                    self.call('POST', '/repos/' + owner + '/' + repo + '/git/refs', branchReference, function() {
+                    self.call('POST', '/repos/' + self.owner + '/' + self.repo + '/git/refs', branchReference, function() {
                         console.log(branchReference.ref + ' created');
                     });
                 });
@@ -95,58 +87,60 @@ function GitHubClient() {
 
         /**
          * Retrieve GitHub reference (branch/tag/commit)
+         * 
+         * @param {string} reference    git reference to a branch, tag or commit
+         * @param {function} callback   callback function
          */
-        retrieveReference: function(owner, repo, reference, callback) {
-            var owner, repo, branchName, reference;
-            self.call('GET', '/repos/' + owner + '/' + repo + '/git/refs/' + reference, null, callback);
+        retrieveReference: function(reference, callback) {
+            var branchName, reference;
+            self.call('GET', '/repos/' + self.owner + '/' + self.repo + '/git/refs/' + reference, null, callback);
         },
 
         /**
          * delete a branch in the repository
          *
-         * @param {string} owner      the repo owner (account holder)
-         * @param {string} repo       the name of the repository
          * @param {string} branchName the name to be deleted
          */
-        deleteBranch: function (owner, repo, branchName) {
-            var owner, repo, branchName;
+        deleteBranch: function (branchName) {
+            var branchName;
 
-            self.call('DELETE', '/repos/' + owner + '/' + repo + '/git/refs/heads/' + branchName);
+            self.call('DELETE', '/repos/' + self.owner + '/' + self.repo + '/git/refs/heads/' + branchName);
         },
 
         /**
          * make a comparison to see if one branch has been merged into another
          *
-         * @param {string} owner the repo owner (account holder)
-         * @param {string} repo  the name of the repository
          * @param {string} base  the base branch
          * @param {string} head  the branch we comparing to the base
          *
          * @return {boolean}
          */
-        isBranchMerged: function(owner, repo, base, head) {
+        isBranchMerged: function(base, head) {
 
             var isMerged = false;
 
-            self.call('GET', '/repos/'+owner+'/'+repo+'/compare/'+base+'...'+head, function(parsedResponse) {
-                if (parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0) {
-                    console.log('is is merged');
-                    isMerged = true;
-                    self.deleteBranch('ticketscript', repo, head);
-                } else {
-                    console.log('it is not merged');
-                    isMerged = false;
-                }
+            self.call(
+                'GET',
+                '/repos/' + self.owner + '/' + self.repo + '/compare/' + base + '...' + head,
+                null,
+                function(parsedResponse) {
+                    if (parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0) {
+                        console.log('is is merged');
+                        isMerged = true;
+                        self.deleteBranch(self.owner, self.repo, head);
+                    } else {
+                        console.log('it is not merged');
+                        isMerged = false;
+                    }
             });
 
             return isMerged;
         },
 
-        getIssue: function (issueKey, repo, title, description) {
+        getIssue: function (issueKey, title, description) {
 
 
             var issueKey,
-                repo,
                 base,
                 title;
 
@@ -179,17 +173,16 @@ function GitHubClient() {
                     parentKey = parsedResponse['fields']['parent']['key'];
                     console.log(parentKey);
                     self.setHeadBranch(parentKey)
-                    self.asyncPullRequest(repo, issueKey, title, description);
+                    self.asyncPullRequest(self.repo, issueKey, title, description);
                 });
             });
             req.end();
         },
 
-        getParentIssue: function (issueKey, repo) {
+        getParentIssue: function (issueKey) {
 
 
-            var issueKey,
-                repo;
+            var issueKey;
 
             var parentKey = 'fff';
 
@@ -225,7 +218,7 @@ function GitHubClient() {
                     //self.asyncPullRequest(repo, issueKey, title, description);
                     if (self.isBranchMerged('ticketscript', 'ticketscript', parentKey, issueKey)) {
 
-                        console.log('gonna delete the branch now . . .repo: ' + repo + ' issue key: ' + issueKey);
+                        console.log('gonna delete the branch now . . .repo: ' + self.repo + ' issue key: ' + issueKey);
                         //self.deleteBranch('ticketscript', repo, issueKey);
                     }
                 });
@@ -241,7 +234,7 @@ function GitHubClient() {
             //console.log('ghchb: ' + self.headBranch);
         },
 
-        asyncPullRequest: function (repo, base, title, description) {
+        asyncPullRequest: function (base, title, description) {
 
             console.log('async pull request! ' + self.headBranch);
             var message = 'merge of ' + base + ' into ' + self.headBranch;
@@ -266,10 +259,10 @@ function GitHubClient() {
             var options = {
                 hostname: this.HOSTNAME,
                 username: this.USERNAME,
-                path: '/repos/ticketscript/' + repo + '/pulls',
+                path: '/repos/ticketscript/' + self.repo + '/pulls',
                 method: 'POST',
                 headers: headers,
-                auth: this.USERNAME + ':' + this.PASSWORD
+                auth: self.USERNAME + ':' + self.PASSWORD
 
             };
             console.log(options);

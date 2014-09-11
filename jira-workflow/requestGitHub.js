@@ -8,8 +8,8 @@ function RequestGitHub() {
 
     var self = {
 
-        client: GitHubClient(),
-        issue: null,
+        client: null,
+        issue:  null,
 
         getIssue: function() {
             // Check if issue exists
@@ -34,13 +34,18 @@ function RequestGitHub() {
          */
         handleAction: function (action, requestParams) {
 
+            // Construct GitHub API client
+            this.client = new GitHubClient(requestParams.owner, requestParams.repo);
+
             switch (action) {
                 case 'create_branch':
                     this.createBranch(requestParams);
                     break;
+
                 case 'create_pull_request':
                     this.createPullRequest(requestParams);
                     break;
+
                 case 'complete_subtask':
                     this.completeSubtask(requestParams);
                     break;
@@ -76,7 +81,7 @@ function RequestGitHub() {
             }
 
             // Create branch
-            this.client.createBranch(requestParams.owner, requestParams.repo, requestParams.branchName, reference);
+            this.client.createBranch(requestParams.branchName, reference);
         },
 
         /**
@@ -85,7 +90,7 @@ function RequestGitHub() {
          * @param requestParams
          */
         createPullRequest: function (requestParams) {
-            this.client.createPullRequest(requestParams.repo, requestParams.head, 'title', 'description');
+            this.client.createPullRequest(requestParams.head, 'title', 'description');
         },
 
         /**
@@ -95,7 +100,7 @@ function RequestGitHub() {
          */
         completeSubtask: function (requestParams) {
 
-            this.client.completeSubTask(requestParams.repo, requestParams.head);
+            this.client.completeSubTask(requestParams.head);
         }
     }
 

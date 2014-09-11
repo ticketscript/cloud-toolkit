@@ -5,6 +5,7 @@
  *   /jira/   -- send POST requests from JIRA's hooks here
  */
 var express = require("express");
+var bodyParser = require('body-parser');
 
 var Config = require('./config.js')
 var RequestHandler = require('./requestHandler');
@@ -13,6 +14,7 @@ var RequestHandler = require('./requestHandler');
 var handler = new RequestHandler();
 
 var app = express();
+app.use(bodyParser.json());
 //var router = express.router();
 
 // Bamboo routes

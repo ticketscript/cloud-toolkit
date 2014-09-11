@@ -3,7 +3,8 @@
   "description": "JIRA workflow automation for Bamboo and Git",
   "version": "0.9.0",
   "dependencies": {
-    "express": "4.x"
+    "express": "4.x",
+    "body-parser": "1.8.x"
   },
   "repository": {
     "type": "git",

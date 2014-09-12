@@ -22,7 +22,6 @@ RequestHandler.prototype.handleRequest = function (request, response) {
 
     // Handling request
     try {
-
         // Call selected request handler
         switch (request.params.type) {
 
@@ -32,6 +31,7 @@ RequestHandler.prototype.handleRequest = function (request, response) {
 
             case 'github':
                 var handler = new requestGitHub();
+                handler.setIssue(request.body.issue);
                 break;
 
             default:
@@ -76,6 +76,5 @@ RequestHandler.prototype.handle = function (params) {
 
     return result;
 }
-
 
 module.exports = RequestHandler

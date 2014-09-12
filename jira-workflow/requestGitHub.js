@@ -6,9 +6,25 @@ var GitHubClient = require('./githubClient');
  */
 function RequestGitHub() {
 
-    var requestGitHub = {
+    var self = {
 
-        client: GitHubClient(),
+        client: null,
+        issue:  null,
+
+        getIssue: function() {
+            // Check if issue exists
+            if (typeof self.issue != 'object') {
+                throw errorMessage.invalidRequest('Issue details are missing in POST request body');
+            }
+
+            return self.issue;
+        },
+
+        setIssue: function (issue) {
+            var issue;
+
+            self.issue = issue;
+        },
 
         /**
          * handle the action
@@ -18,13 +34,18 @@ function RequestGitHub() {
          */
         handleAction: function (action, requestParams) {
 
+            // Construct GitHub API client
+            this.client = new GitHubClient(requestParams.owner, requestParams.repo);
+
             switch (action) {
                 case 'create_branch':
                     this.createBranch(requestParams);
                     break;
+
                 case 'create_pull_request':
                     this.createPullRequest(requestParams);
                     break;
+
                 case 'complete_subtask':
                     this.completeSubtask(requestParams);
                     break;
@@ -40,7 +61,27 @@ function RequestGitHub() {
          * @param requestParams
          */
         createBranch: function (requestParams) {
-            this.client.createBranch(requestParams.owner, requestParams.repo, requestParams.branchName);
+            var requestParams, reference;
+
+            switch (requestParams.forkFrom) {
+
+                case undefined:
+                    // Fork from master (default)
+                    reference = 'heads/master';
+                    break;
+
+                case 'parent':
+                    // Fork from issues parent branch
+                    reference = 'heads/' + this.getIssue().fields.parent.key;
+                    break;
+
+                default:
+                    reference = 'heads/' + requestParams.forkFrom;
+
+            }
+
+            // Create branch
+            this.client.createBranch(requestParams.branchName, reference);
         },
 
         /**
@@ -49,7 +90,16 @@ function RequestGitHub() {
          * @param requestParams
          */
         createPullRequest: function (requestParams) {
-            this.client.createPullRequest(requestParams.repo, requestParams.head, 'title', 'description');
+            var requestParams,
+                issue = this.getIssue();
+
+            var base = issue.fields.parent.key,
+                head = requestParams.head,
+                title = requestParams.head + issue.fields.title,
+                description = 'description';
+
+            // Create the pull request
+            this.client.createPullRequest(base, head, title, description);
         },
 
         /**
@@ -58,12 +108,21 @@ function RequestGitHub() {
          * @param requestParams
          */
         completeSubtask: function (requestParams) {
+            var requestParams,
+                base = this.getIssue().fields.parent.key,
+                head = requestParams.head;
 
-            this.client.completeSubTask(requestParams.repo, requestParams.head);
+            // Check if sub task has is fully merged into base
+            if (this.client.isBranchMerged(base, head)) {
+                // Delete sub task branch
+                this.client.deleteBranch(head);
+            } else {
+                console.error(head + ' is not fully merged with ' + base);
+            }
         }
     }
 
-    return requestGitHub;
+    return self;
 };
 
 module.exports = RequestGitHub

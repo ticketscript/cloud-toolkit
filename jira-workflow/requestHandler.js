@@ -1,76 +1,80 @@
 /*
  * Factory for incoming HTTP requests
  */
-var requestJira = require("./requestJira");
-var requestBamboo = require("./requestBamboo");
-// var errorMessage = require('./errorMessages');
+var requestBamboo   = require("./requestBamboo");
+var requestGitHub   = require("./requestGitHub");
+
 
 function RequestHandler() {
 }
 
-RequestHandler.prototype.handleRequest = function(request, response){
-	
-	var request,
-			response,
-			responseCode,
-			responseJson,
-			err;
+RequestHandler.prototype.handleRequest = function (request, response) {
 
-	// Standard HTTP response
-	responseJson = {"success": true};
-	responseCode = 200;
+    var request,
+        response,
+        responseCode,
+        responseJson,
+        err;
 
-	// Handling request
-	try {
+    // Standard HTTP response
+    responseJson = {"success": true};
+    responseCode = 200;
 
-		// Call selected request handler
+    // Handling request
+    try {
+        // Call selected request handler
+        switch (request.params.type) {
 
-		switch (request.params.type) {
+            case 'bamboo':
+                var handler = new requestBamboo(request.params.issueKey);
+                break;
 
-			case 'bamboo':
-				var handler = new requestBamboo(request.params.issueKey);
+            case 'github':
+                var handler = new requestGitHub();
+                handler.setIssue(request.body.issue);
+                break;
 
-				// Get request object
-				responseJson.result = handler.handleAction(request.params.action, request.params);
-				break;
+            default:
+                throw new Error('Unknown handler type: ' + request.params.type);
+        }
 
-			default:
-				throw new Error('Unknown handler type: ' + request.params.type);
-		}
+        // Handle the request
+        responseJson.result = handler.handleAction(request.params.action, request.params);
 
-	} catch (err) {
-		if (typeof err.code == "integer") {
-			responseCode = err.code;
-		} else {
-			responseCode = 500;
-		}
+    } catch (err) {
+        console.error(err);
 
-		responseJson.success = false;
-		responseJson.error = err;
-	}
+        if (typeof err.code == "integer") {
+            responseCode = err.code;
+        } else {
+            responseCode = 500;
+        }
 
-	// Send response
-	response.status(responseCode);
-	response.send(responseJson);
+        responseJson.success = false;
+        responseJson.error = err;
+    }
+
+    // Send response
+    response.status(responseCode);
+    response.send(responseJson);
 }
 
-RequestHandler.prototype.handle = function(params) {
-	var result = {};
+RequestHandler.prototype.handle = function (params) {
+    var result = {};
 
-	switch (params.action) {
+    switch (params.action) {
 
-		case 'create-branch':
-		case 'build':
-		case 'deploy':
-			console.log('Action ' + params.action + ' called for issue ' + params.issueKey);
-			break;
+        case 'create-branch':
+        case 'build':
+        case 'deploy':
+            console.log('Action ' + params.action + ' called for issue ' + params.issueKey);
+            break;
 
-		default:
-			throw errorMessage.invalidRequest("Unknown action called: " + params.action);
-	}
+        default:
+            throw errorMessage.invalidRequest("Unknown action called: " + params.action);
+    }
 
-	return result;
+    return result;
 }
-
 
 module.exports = RequestHandler

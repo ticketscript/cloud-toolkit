@@ -7,7 +7,7 @@ var BambooClient = require('./bambooClient');
 function RequestBamboo(issueKey) {
 
 	var issueKey,
-			requestBamboo = {
+		requestBamboo = {
 
 		issueKey: issueKey,
 		client: BambooClient(),
@@ -20,18 +20,17 @@ function RequestBamboo(issueKey) {
 			switch (action) {
 
 				case 'trigger':
-					this.triggerProject(requestParams);
+
+		            var project = requestParams['project'];
+		            var stage 	= requestParams['stage'] || '';
+
+					this.client.triggerProject(project, stage, this.issueKey);
 					break;
 
 				default:
 					throw errorMessage.invalidRequest('Unknown bamboo action: ' + action);
 			}
 		},
-
-		triggerProject: function(requestParams) {
-            var requestParams;
-			this.client.triggerProject(requestParams.project, requestParams.stage, this.issueKey);
-		}
 	}
 
 	return requestBamboo;

@@ -33,3 +33,14 @@ done
 
 # Reset Git working folder to previous branch
 cd $DATABASE_MIGRATION_SOURCE_DIR && git checkout -q - && git stash pop
+
+# run migration scripts with scripts/migrate if available
+# the two vars should be set up in the config file
+echo
+if [ -n "$MIGRATE_ENV" -a -n "$MIGRATE_BIN" -a -f "$MIGRATE_BIN" ]; then
+    echo "Executing new-style migration scripts"
+    $MIGRATE_BIN $MIGRATE_ENV --auto-install --continue-on-error latest
+else
+    echo "WARNING: \$MIGRATE_ENV is not set, or could not run \$MIGRATE_BIN"
+    echo "Skipping new-style migration scripts execution"
+fi

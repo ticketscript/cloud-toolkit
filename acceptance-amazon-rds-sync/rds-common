@@ -6,6 +6,7 @@ REGEX_CODE="<Code>(.*)</Code>"
 REGEX_PROGRESS="<PercentProgress>([0-9]+)</PercentProgress>"
 REGEX_INSTANCE_PARAMGROUP="<DBParameterGroupName>(.*)</DBParameterGroupName>"
 REGEX_PARAMETER_STATUS="<ParameterApplyStatus>(.*)</ParameterApplyStatus>"
+REGEX_DATE="<SnapshotCreateTime>(.*?)T(.*?)Z</SnapshotCreateTime>"
 
 #
 # Common RDS functions
@@ -65,6 +66,16 @@ rds_get_snapshot_status() {
 	if [[ "$snapshot_info" =~ $REGEX_PROGRESS ]]; then
 		snapshot_progress="${BASH_REMATCH[1]}"
 	fi
+
+	# Get snapshot date
+	if [[ "$snapshot_info" =~ $REGEX_DATE ]]; then
+                snapshot_date="${BASH_REMATCH[1]}"
+		snapshot_time="${BASH_REMATCH[2]}"
+        else
+                snapshot_date="invalid"
+		snapshot_time="invalid"
+        fi
+
 }
 
 rds_wait_state() {
@@ -119,15 +130,23 @@ do_create_snapshot() {
 	# Check snapshot status
 	rds_get_snapshot_status
 
+	current_date="$(date +'%Y-%m-%d')"
+
 	echo -n "Snapshot $SNAPSHOT status: $snapshot_status"
 	case $snapshot_status in
 
 		"available" )
-			# Remove Existing snapshot
-			rds_remove_snapshot
-			# Create new snapshot
-			rds_create_snapshot
-			rds_get_snapshot_status
+			if [[ $snapshot_date == $current_date ]]; then
+				echo
+				echo "Snapshot already created today. Moving on..."
+				exit 0
+			else
+				# Remove Existing snapshot
+				rds_remove_snapshot
+				# Create new snapshot
+				rds_create_snapshot
+				rds_get_snapshot_status
+			fi
 			;;
 
 		"DBSnapshotNotFound" )

@@ -67,7 +67,7 @@ rds_get_snapshot_status() {
 		snapshot_progress="${BASH_REMATCH[1]}"
 	fi
 
-	# Get snapshot date
+	# Get snapshot date and time
 	if [[ "$snapshot_info" =~ $REGEX_DATE ]]; then
                 snapshot_date="${BASH_REMATCH[1]}"
 		snapshot_time="${BASH_REMATCH[2]}"
@@ -93,6 +93,20 @@ rds_wait_state() {
 	done
 }
 
+rds_snapshot_wait() {
+
+        SNAPSHOT_WAIT_STATE="creating|modifying|rebooting|backing-up|deleting|applying"
+
+        # Check status and wait until the instance is available again
+        rds_get_snapshot_status
+
+        while [ "$snapshot_status" =~ $SNAPSHOT_WAIT_STATE ]; do
+                echo -n "."
+                rds_get_snapshot_status
+                sleep 25
+        done
+}
+
 rds_create_snapshot() {
 
 	if [ "$SNAPSHOT" == "" ]; then
@@ -113,8 +127,6 @@ rds_remove_snapshot() {
 
 	rds-delete-db-snapshot --db-snapshot-identifier "$SNAPSHOT" -f
 }
-
-
 
 #
 # Check and create slave snapshot

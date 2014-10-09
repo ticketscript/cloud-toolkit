@@ -26,13 +26,13 @@ function BambooClient() {
             var planName,
                 branch,
                 stage = stage || '';
-            
-            console.log('Trigger received for Bamboo project ' + planName + ' for branch ' + branch + ' and for stage' + stage);
+
+            console.info('Trigger received for Bamboo project ' + planName + ' for branch ' + branch + ' and for stage ' + stage);
 
             // Retrieve plan and parse response
             self.retrievePlanBranches(planName, function(parsedResponse) {
 
-            	var parsedResponse, 
+            	var parsedResponse,
             		buildPlanBranch;
 
             	// Parse plan branches
@@ -41,7 +41,7 @@ function BambooClient() {
             	// Create build plan if non exists
             	if (!buildPlanBranch) {
 
-            		console.log('Creating ' + planName + ' build plan for branch ' + branch);
+            		console.info('Creating ' + planName + ' build plan for branch ' + branch);
 
 	                // this branch does not exist, so let's register the branch first
                     self.registerPlanBranch(planName, branch, function(buildPlanBranch) {
@@ -50,7 +50,7 @@ function BambooClient() {
                 		self.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
                     });
 	            } else {
-	            	console.log('Found existing ' + planName + ' build plan for branch ' + branch);
+	            	console.info('Found existing ' + planName + ' build plan for branch ' + branch);
 
 	            	// Queue the build
 	            	self.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
@@ -66,7 +66,7 @@ function BambooClient() {
          */
         retrievePlanBranches: function(buildPlanName, callback) {
         	var buildPlanName, callback;
-        	var url = '/rest/api/latest' 
+        	var url = '/rest/api/latest'
         			+ '/plan/' + buildPlanName + '.json?expand=branches&max-results=1000';
 
         	self.call('GET', url, null, callback);
@@ -74,7 +74,7 @@ function BambooClient() {
 
         /**
          * Parse the plan response and update internal status
-         * 
+         *
          * @param {string} parsed bamboo plan response
          * @param {string} branch name that we're looking for
          */
@@ -102,7 +102,7 @@ function BambooClient() {
             var planName, branch, callback;
 
             var url = '/rest/api/latest'
-                    + '/plan/' + planName 
+                    + '/plan/' + planName
                     + '/branch/' + branch + '.json'
                     + '?vcsBranch='+ branch;
 
@@ -128,8 +128,8 @@ function BambooClient() {
             	planBuildUrl += '?stage=' + buildPlanStage + '&executeAllStages=false';
             }
 
-        	console.log('Queueing plan ' + buildPlanKey 
-        								 + (buildPlanStage ? ' stage ' + buildPlanStage : '') 
+        	console.info('Queueing plan ' + buildPlanKey
+        								 + (buildPlanStage ? ' stage ' + buildPlanStage : '')
         								 + ' build for branch ' + branchName);
 
         	// Queue build
@@ -145,7 +145,6 @@ function BambooClient() {
          * @param {function} callback function when request completes
          */
         call: function (method, url, body, callback) {
-
             var method,
                 url,
                 body = body || '',
@@ -171,26 +170,23 @@ function BambooClient() {
 
             	// Collect data chunks into response
                 res.on('data', function (chunk) {
-
-                	var chunk;
-
-                    if (res.statusCode == 200) {
-	            		response += chunk;
-                    } else {
-                        console.error('Request failed: ' + res.headers.status);
-                    }
+                    response += chunk;
                 });
 
-	            // Add response handler
-	            if (callback) {
+                // Response handler
+                res.on('end', function() {
 
-		          	// Response handler
-		          	res.on('end', function() {
-                        var parsedResponse = JSON.parse(response);
+                    var parsedResponse = JSON.parse(response);
+
+                    if (res.statusCode != 200) {
+                        console.warn('Status code: ' + res.statusCode + ', message: ' + parsedResponse['message']);
+                    }
+
+                    if (callback) {
                         // Pass parsed JSON response to callback function
-		          		callback(parsedResponse);
-		          	});
-				}
+                        callback(parsedResponse);
+                    }
+                });
             });
 
             // Write request BODY
@@ -202,7 +198,7 @@ function BambooClient() {
             req.on('error', function (err) {
             	var err;
 
-                console.error(err)
+                console.error(err);
             });
 
             req.end();

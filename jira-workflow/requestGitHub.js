@@ -114,6 +114,7 @@ function RequestGitHub() {
 
             // Check if sub task has is fully merged into base
             if (this.client.isBranchMerged(base, head)) {
+                console.info('Deleting fully merged branch ' + head);
                 // Delete sub task branch
                 this.client.deleteBranch(head);
             } else {

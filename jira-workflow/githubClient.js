@@ -35,11 +35,11 @@ function GitHubClient(owner, repo) {
             self.retrieveReference('heads/' + branchName, function(branchReference) {
 
                 if (branchReference.ref) {
-                    console.log('Branch ' + branchName + ' already exists');
+                    console.warn('Branch ' + branchName + ' already exists');
                     return;
                 }
 
-                console.log('Creating Branch ' + branchName + ' on ' + self.owner + '/' + self.repo + ' from ' + reference);
+                console.info('Creating Branch ' + branchName + ' on ' + self.owner + '/' + self.repo + ' from ' + reference);
 
                 // Retrieve master branch SHA
                 self.retrieveReference(reference, function(baseReference) {
@@ -48,7 +48,7 @@ function GitHubClient(owner, repo) {
                         return;
                     }
 
-                    console.log(reference + ' is at ' + baseReference.object.sha);
+                    console.info(reference + ' is at ' + baseReference.object.sha);
 
                     // Create new branch base reference
                     branchReference = {
@@ -57,7 +57,7 @@ function GitHubClient(owner, repo) {
                     };
 
                     self.call('POST', '/repos/' + self.owner + '/' + self.repo + '/git/refs', branchReference, function() {
-                        console.log(branchReference.ref + ' created');
+                        console.info(branchReference.ref + ' created');
                     });
                 });
             });
@@ -86,7 +86,7 @@ function GitHubClient(owner, repo) {
                 '/repos/' + self.owner + '/' + self.repo + '/pulls',
                 data,
                 function(response) {
-                    console.log('Pull request created for ' + head + ' into ' + base);
+                    console.info('Pull request created for ' + head + ' into ' + base);
                 }
             );
         },
@@ -131,11 +131,9 @@ function GitHubClient(owner, repo) {
                 null,
                 function(parsedResponse) {
                     if (parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0) {
-                        console.log('is is merged');
                         isMerged = true;
                         self.deleteBranch(self.owner, self.repo, head);
-                    } else {
-                        console.log('it is not merged');
+                    } else {                        
                         isMerged = false;
                     }
             });

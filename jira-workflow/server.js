@@ -14,6 +14,7 @@ var RequestHandler = require('./requestHandler');
 var handler = new RequestHandler();
 // Init Express and request body parser
 var app = express();
+
 app.use(bodyParser.json());
 
 // Bamboo routes
@@ -28,4 +29,4 @@ app.route('/jira/:type(github)/:action(create_branch)/:owner/:repo/:branchName/:
 // Start server
 app.listen(Config.app.port);
 
-console.log('Listening on port ' + Config.app.port);
+console.info('Listening on port ' + Config.app.port);

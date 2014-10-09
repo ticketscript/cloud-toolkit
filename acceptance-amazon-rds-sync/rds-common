@@ -100,7 +100,7 @@ rds_snapshot_wait() {
         # Check status and wait until the instance is available again
         rds_get_snapshot_status
 
-        while [ "$snapshot_status" =~ $SNAPSHOT_WAIT_STATE ]; do
+        while [[ "$snapshot_status" =~ $SNAPSHOT_WAIT_STATE ]]; do
                 echo -n "."
                 rds_get_snapshot_status
                 sleep 25
@@ -151,7 +151,6 @@ do_create_snapshot() {
 			if [[ $snapshot_date == $current_date ]]; then
 				echo
 				echo "Snapshot already created today. Moving on..."
-				exit 0
 			else
 				# Remove Existing snapshot
 				rds_remove_snapshot

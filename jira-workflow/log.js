@@ -21,6 +21,7 @@ exports.init = function() {
     });
     transports.push(item);
   }
+
   GLOBAL.logger = new (winston.Logger)({ transports: transports });
   var logColors = {
         info: 'blue',

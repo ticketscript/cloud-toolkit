@@ -23,9 +23,11 @@ var app = express();
 
 //TODO remove extra logging
 app.use(bodyParser.json(),function(req, res, next) {
-	logger.debug('Request Type:', req.method);
-  	logger.debug('Request URL:', req.originalUrl);
-  	logger.debug('Request Params: ', req.params);
+	logger.debug('Incoming request');
+	logger.debug('Method:', req.method);
+  	logger.debug('URL:', req.originalUrl);
+  	logger.debug('Params: ', req.params);
+  	logger.debug('Body: ', req.body);
   	next();
 });
 

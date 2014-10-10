@@ -56,7 +56,7 @@ function RequestGitHub() {
         },
 
         /**
-         * create a new pull request
+         * create a new branch
          *
          * @param requestParams
          */

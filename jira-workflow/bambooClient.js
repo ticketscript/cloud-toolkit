@@ -162,10 +162,11 @@ function BambooClient() {
 				                }
 	            };
 
-            logger.debug('Request url: ' + options.path);
 	        // Start HTTPS request
             var req = https.request(options, function (res) {
-
+                logger.debug('Outgoing Request - Bamboo');
+                logger.debug('URL: ' + options.path);
+                logger.debug('Method: ' + options.method);
             	var res,
             		response = '';
 
@@ -176,17 +177,18 @@ function BambooClient() {
 
                 // Response handler
                 res.on('end', function() {
+                    logger.debug('Incoming Response - Bamboo');
+                    logger.debug('Status code: ' + res.statusCode);
+                    logger.debug('Body: ' + response);
 
-                    logger.debug('Response body: ' + response);
                     var parsedResponse = JSON.parse(response);
-
-                    if (res.statusCode != 200) {
+                    if (res.statusCode == 200) {
+                        if (callback) {
+                            // Pass parsed JSON response to callback function
+                            callback(parsedResponse);
+                        }
+                    } else {
                         logger.warn('Status code: ' + res.statusCode + ', message: ' + parsedResponse['message']);
-                    }
-
-                    if (callback) {
-                        // Pass parsed JSON response to callback function
-                        callback(parsedResponse);
                     }
                 });
             });
@@ -200,7 +202,7 @@ function BambooClient() {
             req.on('error', function (err) {
             	var err;
 
-                logger.error(err);
+                logger.error('' + err);
             });
 
             req.end();

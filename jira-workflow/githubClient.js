@@ -28,6 +28,7 @@ function GitHubClient(owner, repo) {
          * @param {string} branchStart branch to fork from (default master)
          */
         createBranch: function(branchName, reference) {
+
             var branchName, reference,
                 branchReference, branchStart, baseReference;
 
@@ -171,35 +172,34 @@ function GitHubClient(owner, repo) {
 
             // Start HTTPS request
             var req = https.request(options, function (res) {
-
+                logger.debug('Outgoing Request - GitHub');
+                logger.debug('URL: ' + options.path);
+                logger.debug('Method: ' + options.method);
                 var res,
                     response = '';
 
                 // Collect data chunks into response
                 res.on('data', function (chunk) {
-
-                    var chunk;
-
-                    if (res.statusCode >= 200 && res.statusCode < 300) {
-                        response += chunk;
-                    }
+                    response += chunk;
                 });
 
                 // Add response handler
                 // Response handler
                 res.on('end', function() {
-
+                    logger.debug('Incoming Response - GitHub');
+                    logger.debug('Status code: ' + res.statusCode);
+                    logger.debug('Body: ' + response);
+                    var parsedResponse = JSON.parse(response);
                     if (res.statusCode >= 200 && res.statusCode < 300) {
-
-                        var parsedResponse = JSON.parse(response);
 
                         // Pass parsed JSON response to callback function
                         callback(parsedResponse);
 
-                    } else if (res.statusCode == 404) {
-                        callback({});
                     } else {
-                        logger.error('Request failed: ' + res.headers.status);
+                        if (res.statusCode == 404) {
+                            callback({});
+                        }
+                        logger.warn('Status code: ' + res.statusCode + ', message: ' + parsedResponse['message']);
                     }
                 });
             });
@@ -208,6 +208,13 @@ function GitHubClient(owner, repo) {
             if (body.length) {
                 req.write(body);
             }
+
+            // Add error handler
+            req.on('error', function (err) {
+                var err;
+
+                logger.error('' + err);
+            });
 
             req.end();
         }

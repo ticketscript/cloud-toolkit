@@ -23,32 +23,32 @@ function GitHubClient(owner, repo) {
 
         /**
          * create a branch in git based on master
-         * 
+         *
          * @param {string} branchName the name to be created
          * @param {string} branchStart branch to fork from (default master)
          */
         createBranch: function(branchName, reference) {
-            var branchName, reference, 
+            var branchName, reference,
                 branchReference, branchStart, baseReference;
 
             // Check if branch already exists first
             self.retrieveReference('heads/' + branchName, function(branchReference) {
 
                 if (branchReference.ref) {
-                    console.warn('Branch ' + branchName + ' already exists');
+                    logger.warn('Branch ' + branchName + ' already exists');
                     return;
                 }
 
-                console.info('Creating Branch ' + branchName + ' on ' + self.owner + '/' + self.repo + ' from ' + reference);
+                logger.info('Creating Branch ' + branchName + ' on ' + self.owner + '/' + self.repo + ' from ' + reference);
 
                 // Retrieve master branch SHA
                 self.retrieveReference(reference, function(baseReference) {
                     if (!baseReference.object) {
-                        console.error('Reference ' + reference + ' does not exist');
+                        logger.error('Reference ' + reference + ' does not exist');
                         return;
                     }
 
-                    console.info(reference + ' is at ' + baseReference.object.sha);
+                    logger.info(reference + ' is at ' + baseReference.object.sha);
 
                     // Create new branch base reference
                     branchReference = {
@@ -57,7 +57,7 @@ function GitHubClient(owner, repo) {
                     };
 
                     self.call('POST', '/repos/' + self.owner + '/' + self.repo + '/git/refs', branchReference, function() {
-                        console.info(branchReference.ref + ' created');
+                        logger.info(branchReference.ref + ' created');
                     });
                 });
             });
@@ -86,7 +86,7 @@ function GitHubClient(owner, repo) {
                 '/repos/' + self.owner + '/' + self.repo + '/pulls',
                 data,
                 function(response) {
-                    console.info('Pull request created for ' + head + ' into ' + base);
+                    logger.info('Pull request created for ' + head + ' into ' + base);
                 }
             );
         },
@@ -104,7 +104,7 @@ function GitHubClient(owner, repo) {
 
         /**
          * Retrieve GitHub reference (branch/tag/commit)
-         * 
+         *
          * @param {string} reference    git reference to a branch, tag or commit
          * @param {function} callback   callback function
          */
@@ -133,7 +133,7 @@ function GitHubClient(owner, repo) {
                     if (parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0) {
                         isMerged = true;
                         self.deleteBranch(self.owner, self.repo, head);
-                    } else {                        
+                    } else {
                         isMerged = false;
                     }
             });
@@ -199,7 +199,7 @@ function GitHubClient(owner, repo) {
                     } else if (res.statusCode == 404) {
                         callback({});
                     } else {
-                        console.error('Request failed: ' + res.headers.status);
+                        logger.error('Request failed: ' + res.headers.status);
                     }
                 });
             });

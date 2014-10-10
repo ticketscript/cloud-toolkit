@@ -27,7 +27,7 @@ function BambooClient() {
                 branch,
                 stage = stage || '';
 
-            console.info('Trigger received for Bamboo project ' + planName + ' for branch ' + branch + ' and for stage ' + stage);
+            logger.info('Trigger received for Bamboo project ' + planName + ' for branch ' + branch + ' and for stage ' + stage);
 
             // Retrieve plan and parse response
             self.retrievePlanBranches(planName, function(parsedResponse) {
@@ -41,7 +41,7 @@ function BambooClient() {
             	// Create build plan if non exists
             	if (!buildPlanBranch) {
 
-            		console.info('Creating ' + planName + ' build plan for branch ' + branch);
+            		logger.info('Creating ' + planName + ' build plan for branch ' + branch);
 
 	                // this branch does not exist, so let's register the branch first
                     self.registerPlanBranch(planName, branch, function(buildPlanBranch) {
@@ -50,7 +50,7 @@ function BambooClient() {
                 		self.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
                     });
 	            } else {
-	            	console.info('Found existing ' + planName + ' build plan for branch ' + branch);
+	            	logger.info('Found existing ' + planName + ' build plan for branch ' + branch);
 
 	            	// Queue the build
 	            	self.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
@@ -128,7 +128,7 @@ function BambooClient() {
             	planBuildUrl += '?stage=' + buildPlanStage + '&executeAllStages=false';
             }
 
-        	console.info('Queueing plan ' + buildPlanKey
+        	logger.info('Queueing plan ' + buildPlanKey
         								 + (buildPlanStage ? ' stage ' + buildPlanStage : '')
         								 + ' build for branch ' + branchName);
 
@@ -162,6 +162,7 @@ function BambooClient() {
 				                }
 	            };
 
+            logger.debug('Request url: ' + options.path);
 	        // Start HTTPS request
             var req = https.request(options, function (res) {
 
@@ -176,10 +177,11 @@ function BambooClient() {
                 // Response handler
                 res.on('end', function() {
 
+                    logger.debug('Response body: ' + response);
                     var parsedResponse = JSON.parse(response);
 
                     if (res.statusCode != 200) {
-                        console.warn('Status code: ' + res.statusCode + ', message: ' + parsedResponse['message']);
+                        logger.warn('Status code: ' + res.statusCode + ', message: ' + parsedResponse['message']);
                     }
 
                     if (callback) {
@@ -198,7 +200,7 @@ function BambooClient() {
             req.on('error', function (err) {
             	var err;
 
-                console.error(err);
+                logger.error(err);
             });
 
             req.end();

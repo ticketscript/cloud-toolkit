@@ -94,9 +94,10 @@ function RequestGitHub() {
                 issue = this.getIssue();
 
             var base = issue.fields.parent.key,
-                head = requestParams.head,
-                title = requestParams.head + issue.fields.title,
-                description = 'description';
+                // No cross-repository pull requests for now
+                head = issue.key,
+                title = issue.fields.summary,
+                description = issue.fields.description;
 
             // Create the pull request
             this.client.createPullRequest(base, head, title, description);

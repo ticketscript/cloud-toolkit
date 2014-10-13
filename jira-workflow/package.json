@@ -4,13 +4,16 @@
   "version": "0.9.0",
   "dependencies": {
     "express": "4.x",
-    "body-parser": "1.8.x"
+    "body-parser": "1.8.x",
+    "winston": "0.8.1"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:ticketscript/cloud-toolkit.git"
   },
   "devDependencies": {
+     "nodeunit": "0.9.0",
+     "nock": "0.48.0"
   },
   "engines": {
     "node": ">=0.10.15"

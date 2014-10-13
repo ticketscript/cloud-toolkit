@@ -23,32 +23,33 @@ function GitHubClient(owner, repo) {
 
         /**
          * create a branch in git based on master
-         * 
+         *
          * @param {string} branchName the name to be created
          * @param {string} branchStart branch to fork from (default master)
          */
         createBranch: function(branchName, reference) {
-            var branchName, reference, 
+
+            var branchName, reference,
                 branchReference, branchStart, baseReference;
 
             // Check if branch already exists first
             self.retrieveReference('heads/' + branchName, function(branchReference) {
 
                 if (branchReference.ref) {
-                    console.log('Branch ' + branchName + ' already exists');
+                    logger.warn('Branch ' + branchName + ' already exists');
                     return;
                 }
 
-                console.log('Creating Branch ' + branchName + ' on ' + self.owner + '/' + self.repo + ' from ' + reference);
+                logger.info('Creating Branch ' + branchName + ' on ' + self.owner + '/' + self.repo + ' from ' + reference);
 
                 // Retrieve master branch SHA
                 self.retrieveReference(reference, function(baseReference) {
                     if (!baseReference.object) {
-                        console.error('Reference ' + reference + ' does not exist');
+                        logger.error('Reference ' + reference + ' does not exist');
                         return;
                     }
 
-                    console.log(reference + ' is at ' + baseReference.object.sha);
+                    logger.info(reference + ' is at ' + baseReference.object.sha);
 
                     // Create new branch base reference
                     branchReference = {
@@ -57,7 +58,7 @@ function GitHubClient(owner, repo) {
                     };
 
                     self.call('POST', '/repos/' + self.owner + '/' + self.repo + '/git/refs', branchReference, function() {
-                        console.log(branchReference.ref + ' created');
+                        logger.info(branchReference.ref + ' created');
                     });
                 });
             });
@@ -86,7 +87,7 @@ function GitHubClient(owner, repo) {
                 '/repos/' + self.owner + '/' + self.repo + '/pulls',
                 data,
                 function(response) {
-                    console.log('Pull request created for ' + head + ' into ' + base);
+                    logger.info('Pull request created for ' + head + ' into ' + base);
                 }
             );
         },
@@ -104,7 +105,7 @@ function GitHubClient(owner, repo) {
 
         /**
          * Retrieve GitHub reference (branch/tag/commit)
-         * 
+         *
          * @param {string} reference    git reference to a branch, tag or commit
          * @param {function} callback   callback function
          */
@@ -131,11 +132,9 @@ function GitHubClient(owner, repo) {
                 null,
                 function(parsedResponse) {
                     if (parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0) {
-                        console.log('is is merged');
                         isMerged = true;
                         self.deleteBranch(self.owner, self.repo, head);
                     } else {
-                        console.log('it is not merged');
                         isMerged = false;
                     }
             });
@@ -173,35 +172,34 @@ function GitHubClient(owner, repo) {
 
             // Start HTTPS request
             var req = https.request(options, function (res) {
-
+                logger.debug('Outgoing Request - GitHub');
+                logger.debug('URL: ' + options.path);
+                logger.debug('Method: ' + options.method);
                 var res,
                     response = '';
 
                 // Collect data chunks into response
                 res.on('data', function (chunk) {
-
-                    var chunk;
-
-                    if (res.statusCode >= 200 && res.statusCode < 300) {
-                        response += chunk;
-                    }
+                    response += chunk;
                 });
 
                 // Add response handler
                 // Response handler
                 res.on('end', function() {
-
+                    logger.debug('Incoming Response - GitHub');
+                    logger.debug('Status code: ' + res.statusCode);
+                    logger.debug('Body: ' + response);
+                    var parsedResponse = JSON.parse(response);
                     if (res.statusCode >= 200 && res.statusCode < 300) {
-
-                        var parsedResponse = JSON.parse(response);
 
                         // Pass parsed JSON response to callback function
                         callback(parsedResponse);
 
-                    } else if (res.statusCode == 404) {
-                        callback({});
                     } else {
-                        console.error('Request failed: ' + res.headers.status);
+                        if (res.statusCode == 404) {
+                            callback({});
+                        }
+                        logger.warn('Status code: ' + res.statusCode + ', message: ' + parsedResponse['message']);
                     }
                 });
             });
@@ -210,6 +208,13 @@ function GitHubClient(owner, repo) {
             if (body.length) {
                 req.write(body);
             }
+
+            // Add error handler
+            req.on('error', function (err) {
+                var err;
+
+                logger.error('' + err);
+            });
 
             req.end();
         }

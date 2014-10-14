@@ -30,7 +30,10 @@ exports['testTriggerNonExistingBranch'] = function (test) {
 		  .reply(200,jsonFixtures.resQueueBuild);
 
 	test.equal(bambooHandler.issueKey, testBranch);
-	bambooHandler.handleAction('trigger',{'project':'testProject'});
+	bambooHandler.handleAction({
+		action: 'trigger',
+		project:'testProject'
+	});
 
 	// check that all expected communication has taken place
 	setTimeout(function() {
@@ -42,7 +45,7 @@ exports['testTriggerNonExistingBranch'] = function (test) {
 
 // Test if Handler responds to the action Trigger
 exports['testTriggerExistingBranch'] = function (test) {
-	test.expect(2);
+	test.expect(1);
 
 	// Mock Bamboo interaction
 	bambooMock.get(Config.atlassian.pathPrefix + '/rest/api/latest/plan/' + testProject +'.json?expand=branches&max-results=1000')
@@ -50,8 +53,10 @@ exports['testTriggerExistingBranch'] = function (test) {
 		  .post(Config.atlassian.pathPrefix + '/rest/api/latest/queue/' + testProject + '.json')
 		  .reply(200,jsonFixtures.resQueueBuild);
 
-	test.equal(bambooHandler.issueKey, testBranch);
-	bambooHandler.handleAction('trigger',{'project':'testProject'});
+	bambooHandler.handleAction({
+		action: 'trigger',
+		project:'testProject'
+	});
 
 	// check that all expected communication has taken place
 	setTimeout(function() {
@@ -72,7 +77,12 @@ exports['testTriggerStageNonExistingBranch'] = function (test) {
 		  .post(Config.atlassian.pathPrefix + '/rest/api/latest/queue/' + testBuild + '.json?stage=' + testStage + '&executeAllStages=false')
 		  .reply(200,jsonFixtures.resQueueBuild);
 
-	bambooHandler.handleAction('trigger',{'project':testProject, 'stage':testStage});
+	bambooHandler.handleAction({
+		action: 'trigger',
+		project: testProject,
+		stage :testStage
+	});
+
 	// check that all expected communication has taken place
 	setTimeout(function() {
 		test.ok(bambooMock.isDone(), 'Remaining mocks: ' + bambooMock.pendingMocks());
@@ -90,7 +100,12 @@ exports['testTriggerStageExistingBranch'] = function (test) {
 		  .post(Config.atlassian.pathPrefix + '/rest/api/latest/queue/' + testProject + '.json?stage=' + testStage + '&executeAllStages=false')
 		  .reply(200,jsonFixtures.resQueueBuild);
 
-	bambooHandler.handleAction('trigger',{'project':testProject, 'stage':testStage});
+	bambooHandler.handleAction({
+		action: 'trigger',
+		project: testProject,
+		stage :testStage
+	});
+
 	// check that all expected communication has taken place
 	setTimeout(function() {
 		test.ok(bambooMock.isDone(), 'Remaining mocks: ' + bambooMock.pendingMocks());

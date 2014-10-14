@@ -6,18 +6,17 @@ var BambooClient = require('./bambooClient');
  */
 function RequestBamboo(issueKey) {
 
-	var issueKey,
-		requestBamboo = {
+	var requestBamboo = {
 
 		issueKey: issueKey,
 		client: BambooClient(),
 
-		handleAction: function(action, requestParams){
+		handleAction: function(requestParams){
 
 			var action,
                 requestParams;
 
-			switch (action) {
+			switch (requestParams.action) {
 
 				case 'trigger':
 

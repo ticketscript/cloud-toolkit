@@ -17,57 +17,64 @@ function BambooClient() {
         /**
          * trigger the build service
          *
-         * @param {string} planName the name of the build plan
-         * @param {string} stage the stage of the build process
-         * @param {string} branch the name of the jira story branch
+         * @param {string} plan: the name of the build plan
+         * @param {string} stage: the stage of the build process
+         * @param {string} branch: the name of the jira story branch
          */
-        triggerProject: function (planName, stage, branch) {
+        triggerProject: function (plan, stage, branch) {
 
-            var planName,
-                branch,
-                stage = stage || '';
+            var stage = stage || '';
 
-            logger.info('Trigger received for Bamboo project ' + planName + ' for branch ' + branch + ' and for stage ' + stage);
+            logger.info('Trigger received for Bamboo project ' + plan + ' for branch ' + branch + ' and for stage ' + stage);
 
             // Retrieve plan and parse response
-            self.retrievePlanBranches(planName, function(parsedResponse) {
+            self.retrievePlanBranches(plan, function(parsedResponse) {
 
             	var parsedResponse,
             		buildPlanBranch;
 
             	// Parse plan branches
             	buildPlanBranch = self.findBranch(parsedResponse, branch);
-
-            	// Create build plan if non exists
-            	if (!buildPlanBranch) {
-
-            		logger.info('Creating ' + planName + ' build plan for branch ' + branch);
-
-	                // this branch does not exist, so let's register the branch first
-                    self.registerPlanBranch(planName, branch, function(buildPlanBranch) {
-
-                    	// Queue the build
-                		self.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
-                    });
-	            } else {
-	            	logger.info('Found existing ' + planName + ' build plan for branch ' + branch);
-
-	            	// Queue the build
-	            	self.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
-	            }
+                if (!buildPlanBranch) {
+                    //TODO: throw error?
+                    logger.error('Plan branch ' + branch + ' not found, could not trigger build.');
+                    return;
+                }
+                self.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
 			});
         },
+        /**
+         * Register given branch as a plan branch, unless it is already registered.
+         *
+         * @param {string} plan the name of the build plan
+         * @param {string} branch the name of the jira story branch
+         */
+        registerBranchAtProject: function (plan, branch) {
+            // Retrieve plan and check if branch exists
+            self.retrievePlanBranches(plan, function (parsedResponse) {
 
+                var buildPlanBranch = self.findBranch(parsedResponse, branch);
+
+                if (!buildPlanBranch) {
+
+                    logger.info('Registering branch ' + branch + ' at Bamboo project ' + plan);
+                    self.registerPlanBranch(plan, branch, function(buildPlanBranch) {
+
+                    });
+                } else {
+                    logger.info('Found existing branch (' + branch + ') for ' + plan);
+                }
+            });
+        },
         /**
          * api call to retrieve the branches that currently exist
          *
-         * @param {string} build plan name
-         * @param {function} callback function for parsed response
+         * @param {string} plan: build plan name
+         * @param {function} callback: callback function for parsed response
          */
-        retrievePlanBranches: function(buildPlanName, callback) {
-        	var buildPlanName, callback;
+        retrievePlanBranches: function(plan, callback) {
         	var url = '/rest/api/latest'
-        			+ '/plan/' + buildPlanName + '.json?expand=branches&max-results=1000';
+        			+ '/plan/' + plan + '.json?expand=branches&max-results=1000';
 
         	self.call('GET', url, null, callback);
         },
@@ -75,17 +82,14 @@ function BambooClient() {
         /**
          * Parse the plan response and update internal status
          *
-         * @param {string} parsed bamboo plan response
-         * @param {string} branch name that we're looking for
+         * @param {string} parsedResponse: parsed bamboo plan response
+         * @param {string} branch: branch name that we're looking for
          */
-        findBranch: function(parsedResponse, branchName) {
-
-        	var parsedResponse, branchName;
-
+        findBranch: function(parsedResponse, branch) {
             for (var id in parsedResponse['branches']['branch']) {
             	var buildPlanBranch = parsedResponse['branches']['branch'][id];
 
-                if (branchName == buildPlanBranch['shortName']) {
+                if (branch == buildPlanBranch['shortName']) {
 		           	// the build plan branch exists
                     return buildPlanBranch;
                 }
@@ -94,15 +98,13 @@ function BambooClient() {
 
         /**
          * api call to register a branch in an existing build plan
-         * @param {string} build plan name
-         * @param {string} branch name
+         * @param {string} plan: build plan name
+         * @param {string} branch: branch name
          * @param {function} callback
          */
-        registerPlanBranch: function(planName, branch, callback) {
-            var planName, branch, callback;
-
+        registerPlanBranch: function(plan, branch, callback) {
             var url = '/rest/api/latest'
-                    + '/plan/' + planName
+                    + '/plan/' + plan
                     + '/branch/' + branch + '.json'
                     + '?vcsBranch='+ branch;
 
@@ -117,8 +119,6 @@ function BambooClient() {
          * @param {string} branch name
          */
         queuePlanBranch: function (buildPlanKey, buildPlanStage, branchName) {
-
-        	var buildPlanKey, buildPlanStage, branchName;
 
             var planBuildUrl = '/rest/api/latest/queue/' + buildPlanKey + '.json';
             var postData = branchName ? 'bamboo.variable.branchShortName=' + branchName : '';

@@ -1,7 +1,7 @@
 var Config = require('../config')
 //initialize logging mechanism
 var log = require('../log');
-Config.log.console.enable = true;
+Config.log.console.enable = false;
 Config.log.file.enable = false;
 log.init();
 

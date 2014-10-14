@@ -121,11 +121,10 @@ function GitHubClient(owner, repo) {
 
         /**
          * make a comparison to see if one branch has been merged into another. Then
-         * call back provided function with a flag
          *
          * @param {string} base  the base branch
          * @param {string} head  the branch we comparing to the base
-         *
+         * @param {function} callback function
          */
         isBranchMerged: function(base, head, callback) {
             self.call(
@@ -133,12 +132,8 @@ function GitHubClient(owner, repo) {
                 '/repos/' + self.owner + '/' + self.repo + '/compare/' + base + '...' + head,
                 null,
                 function(parsedResponse) {
-                    if (parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0) {
-                        //fully merged
-                        callback(true);
-                    } else {
-                        callback(false);
-                    }
+                    isMerged = parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0;
+                    callback(isMerged);
             });
         },
 

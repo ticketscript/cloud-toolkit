@@ -13,19 +13,18 @@ function RequestBamboo(issueKey) {
 
 		handleAction: function(requestParams){
 
-			var action,
-                requestParams;
-
-			switch (requestParams.action) {
-
+			var action = requestParams.action;
+			switch (action) {
 				case 'trigger':
-
 		            var project = requestParams['project'];
 		            var stage 	= requestParams['stage'] || '';
 
 					this.client.triggerProject(project, stage, this.issueKey);
 					break;
-
+				case 'register':
+					var project = requestParams['project'];
+					this.client.registerBranchAtProject(project, this.issueKey);
+					break;
 				default:
 					throw errorMessage.invalidRequest('Unknown bamboo action: ' + action);
 			}

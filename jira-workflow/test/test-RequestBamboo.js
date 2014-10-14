@@ -1,7 +1,7 @@
 var Config = require('../config')
 //initialize logging mechanism
 var log = require('../log');
-Config.log.console.enable = false;
+Config.log.console.enable = true;
 Config.log.file.enable = false;
 log.init();
 
@@ -23,11 +23,7 @@ exports['testTriggerNonExistingBranch'] = function (test) {
 
 	// Mock Bamboo interaction
 	bambooMock.get(Config.atlassian.pathPrefix + '/rest/api/latest/plan/' + testProject +'.json?expand=branches&max-results=1000')
-	      .reply(200, jsonFixtures.resPlanBranchesExcludingTestBranch)
-	      .put(Config.atlassian.pathPrefix + '/rest/api/latest/plan/' + testProject +'/branch/' + testBranch + '.json?vcsBranch=' + testBranch)
-		  .reply(200, jsonFixtures.resBranchSetVCSBranch)
-		  .post(Config.atlassian.pathPrefix + '/rest/api/latest/queue/' + testBuild + '.json')
-		  .reply(200,jsonFixtures.resQueueBuild);
+	      	  .reply(200, jsonFixtures.resPlanBranchesExcludingTestBranch);
 
 	test.equal(bambooHandler.issueKey, testBranch);
 	bambooHandler.handleAction({
@@ -71,11 +67,7 @@ exports['testTriggerStageNonExistingBranch'] = function (test) {
 	test.expect(1);
 	// Mock Bamboo interaction
 	bambooMock.get(Config.atlassian.pathPrefix + '/rest/api/latest/plan/' + testProject +'.json?expand=branches&max-results=1000')
-	      .reply(200, jsonFixtures.resPlanBranchesExcludingTestBranch)
-	      .put(Config.atlassian.pathPrefix + '/rest/api/latest/plan/' + testProject +'/branch/' + testBranch + '.json?vcsBranch=' + testBranch)
-		  .reply(200, jsonFixtures.resBranchSetVCSBranch)
-		  .post(Config.atlassian.pathPrefix + '/rest/api/latest/queue/' + testBuild + '.json?stage=' + testStage + '&executeAllStages=false')
-		  .reply(200,jsonFixtures.resQueueBuild);
+	      .reply(200, jsonFixtures.resPlanBranchesExcludingTestBranch);
 
 	bambooHandler.handleAction({
 		action: 'trigger',
@@ -104,6 +96,48 @@ exports['testTriggerStageExistingBranch'] = function (test) {
 		action: 'trigger',
 		project: testProject,
 		stage :testStage
+	});
+
+	// check that all expected communication has taken place
+	setTimeout(function() {
+		test.ok(bambooMock.isDone(), 'Remaining mocks: ' + bambooMock.pendingMocks());
+		test.done();
+		nock.cleanAll();
+	}, 1000);
+}
+
+exports['testRegisterNonExistingBranch'] = function(test) {
+	test.expect(1);
+
+	// Mock Bamboo interaction
+	bambooMock.get(Config.atlassian.pathPrefix + '/rest/api/latest/plan/' + testProject +'.json?expand=branches&max-results=1000')
+	      .reply(200, jsonFixtures.resPlanBranchesExcludingTestBranch)
+		  .put(Config.atlassian.pathPrefix + '/rest/api/latest/plan/' + testProject +'/branch/' + testBranch + '.json?vcsBranch=' + testBranch)
+		  .reply(200, jsonFixtures.resBranchSetVCSBranch);
+
+	bambooHandler.handleAction({
+		action: 'register',
+		project: testProject,
+	});
+
+	// check that all expected communication has taken place
+	setTimeout(function() {
+		test.ok(bambooMock.isDone(), 'Remaining mocks: ' + bambooMock.pendingMocks());
+		test.done();
+		nock.cleanAll();
+	}, 1000);
+}
+
+exports['testRegisterExistingBranch'] = function(test) {
+	test.expect(1);
+
+	// Mock Bamboo interaction
+	bambooMock.get(Config.atlassian.pathPrefix + '/rest/api/latest/plan/' + testProject +'.json?expand=branches&max-results=1000')
+	      .reply(200, jsonFixtures.resPlanBranchesIncludingTestBranch);
+
+	bambooHandler.handleAction({
+		action: 'register',
+		project: testProject,
 	});
 
 	// check that all expected communication has taken place

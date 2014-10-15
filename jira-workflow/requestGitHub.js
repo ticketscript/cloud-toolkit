@@ -89,8 +89,16 @@ function RequestGitHub(issue, owner, repo) {
          * @param requestParams
          */
         deleteBranch: function (requestParams) {
-            var base = this.issue.fields.parent.key,
+            var base,
                 head = this.issue.key;
+
+            if (this.issue.fields.parent) {
+                // Request coming from a technical task
+                base = this.issue.fields.parent.key;
+            } else {
+                base = 'heads/master';
+            }
+
             this.client.deleteBranchIfMerged(base, head);
         }
     }

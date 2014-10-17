@@ -16,6 +16,7 @@ var testHeadBranch = 'TST-01';
 var githubClient = new GitHubClient(testOwner, testRepo);
 
 exports['testIsBranchMergedFullyMerged'] = function (test) {
+	test.expect(2);
 	var testResult = false;
 	// fully merged branch
 	gitHubMock.get('/repos/' + testOwner + '/' + testRepo + '/compare/' + testBaseBranch + '...' + testHeadBranch)
@@ -34,6 +35,7 @@ exports['testIsBranchMergedFullyMerged'] = function (test) {
 }
 
 exports['testIsBranchMergedNotFullyMerged'] = function (test) {
+	test.expect(2);
 	var testResult = false;
 	// not fully merged branch
 	gitHubMock.get('/repos/' + testOwner + '/' + testRepo + '/compare/' + testBaseBranch + '...' + testHeadBranch)
@@ -45,6 +47,43 @@ exports['testIsBranchMergedNotFullyMerged'] = function (test) {
 
 	setTimeout(function() {
 		test.ok(!testResult);
+		test.ok(gitHubMock.isDone(), 'Remaining mocks: ' + gitHubMock.pendingMocks());
+		test.done();
+		nock.cleanAll();
+	}, 1000);
+}
+
+exports['testCreatePullRequestNoCommitsBetweenHeadAndBase'] = function (test) {
+	test.expect(1);
+
+	// not fully merged branch
+	// '/repos/' + self.owner + '/' + self.repo + '/pulls',
+	gitHubMock.post('/repos/' + testOwner + '/' + testRepo + '/pulls')
+			  .reply(422, {
+			  	message: "Validation Failed",
+			  	documentation_url: "https://developer.github.com/v3/pulls/#create-a-pull-request",
+			  	"errors": [{resource:"PullRequest", code:"custom", message:'No commits between ' + testBaseBranch + ' and ' + testHeadBranch}]});
+
+	githubClient.createPullRequest(testBaseBranch, testHeadBranch, 'testTitle', 'testDescription');
+
+	setTimeout(function() {
+		test.ok(gitHubMock.isDone(), 'Remaining mocks: ' + gitHubMock.pendingMocks());
+		test.done();
+		nock.cleanAll();
+	}, 1000);
+}
+
+exports['testCreatePullRequest'] = function (test) {
+	test.expect(1);
+
+	// not fully merged branch
+	// '/repos/' + self.owner + '/' + self.repo + '/pulls',
+	gitHubMock.post('/repos/' + testOwner + '/' + testRepo + '/pulls')
+			  .reply(201, {});
+
+	githubClient.createPullRequest(testBaseBranch, testHeadBranch, 'testTitle', 'testDescription');
+
+	setTimeout(function() {
 		test.ok(gitHubMock.isDone(), 'Remaining mocks: ' + gitHubMock.pendingMocks());
 		test.done();
 		nock.cleanAll();

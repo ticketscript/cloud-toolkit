@@ -28,13 +28,12 @@ function BambooClient() {
             logger.info('Trigger received for Bamboo project ' + plan + ' for branch ' + branch + ' and for stage ' + stage);
 
             // Retrieve plan and parse response
-            self.retrievePlanBranches(plan, function(parsedResponse) {
+            self.retrievePlanBranches(plan, function(status, response) {
 
-            	var parsedResponse,
-            		buildPlanBranch;
+            	var buildPlanBranch;
 
             	// Parse plan branches
-            	buildPlanBranch = self.findBranch(parsedResponse, branch);
+            	buildPlanBranch = self.findBranch(response, branch);
                 if (!buildPlanBranch) {
                     //TODO: throw error?
                     logger.error('Plan branch ' + branch + ' not found, could not trigger build.');
@@ -51,15 +50,19 @@ function BambooClient() {
          */
         registerBranchAtProject: function (plan, branch) {
             // Retrieve plan and check if branch exists
-            self.retrievePlanBranches(plan, function (parsedResponse) {
+            self.retrievePlanBranches(plan, function (status, response) {
 
-                var buildPlanBranch = self.findBranch(parsedResponse, branch);
+                var buildPlanBranch = self.findBranch(response, branch);
 
                 if (!buildPlanBranch) {
 
                     logger.info('Registering branch ' + branch + ' at Bamboo project ' + plan);
-                    self.registerPlanBranch(plan, branch, function(buildPlanBranch) {
-
+                    self.registerPlanBranch(plan, branch, function(status, response) {
+                        if (status == 200) {
+                            logger.info('Registered branch ' + response.shortName + 'at Bamboo project ' + response.key);
+                        } else {
+                            logger.warn('Status code: ' + status + ', message: ' + response.message);
+                        }
                     });
                 } else {
                     logger.info('Found existing branch (' + branch + ') for ' + plan);
@@ -82,12 +85,12 @@ function BambooClient() {
         /**
          * Parse the plan response and update internal status
          *
-         * @param {string} parsedResponse: parsed bamboo plan response
+         * @param {string} response: parsed bamboo plan response
          * @param {string} branch: branch name that we're looking for
          */
-        findBranch: function(parsedResponse, branch) {
-            for (var id in parsedResponse['branches']['branch']) {
-            	var buildPlanBranch = parsedResponse['branches']['branch'][id];
+        findBranch: function(response, branch) {
+            for (var id in response['branches']['branch']) {
+            	var buildPlanBranch = response['branches']['branch'][id];
 
                 if (branch == buildPlanBranch['shortName']) {
 		           	// the build plan branch exists
@@ -128,12 +131,22 @@ function BambooClient() {
             	planBuildUrl += '?stage=' + buildPlanStage + '&executeAllStages=false';
             }
 
-        	logger.info('Queueing plan ' + buildPlanKey
-        								 + (buildPlanStage ? ' stage ' + buildPlanStage : '')
-        								 + ' build for branch ' + branchName);
-
+            logger.info('Queueing build ' + buildPlanKey
+                                        + (buildPlanStage ? ', stage ' + buildPlanStage : '')
+                                        + ' for branch ' + branchName);
         	// Queue build
-            self.call('POST', planBuildUrl, postData);
+            self.call('POST', planBuildUrl, postData, function(status, response){
+                switch (status){
+                    case 400:
+                        logger.error(response.message);
+                        break;
+                    case 200:
+                        logger.info('Triggered build ' + response.buildResultKey);
+                        break;
+                    default:
+                        logger.warn('Status: ' + status + ', response: ' + response);
+                }
+            });
         },
 
         /**
@@ -145,10 +158,7 @@ function BambooClient() {
          * @param {function} callback function when request completes
          */
         call: function (method, url, body, callback) {
-            var method,
-                url,
-                body = body || '',
-                callback;
+            var body = body || '';
 
             var options = {
 	                hostname:   self.HOSTNAME,
@@ -181,14 +191,13 @@ function BambooClient() {
                     logger.debug('Status code: ' + res.statusCode);
                     logger.debug('Body: ' + response);
 
-                    var parsedResponse = JSON.parse(response);
-                    if (res.statusCode == 200) {
-                        if (callback) {
-                            // Pass parsed JSON response to callback function
-                            callback(parsedResponse);
-                        }
-                    } else {
-                        logger.warn('Status code: ' + res.statusCode + ', message: ' + parsedResponse['message']);
+                    if (response.length > 0) {
+                        parsedResponse = JSON.parse(response);
+                    }
+
+                    if (callback) {
+                        // Pass parsed JSON response to callback function
+                        callback(res.statusCode, parsedResponse);
                     }
                 });
             });

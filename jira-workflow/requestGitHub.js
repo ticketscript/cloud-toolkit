@@ -18,7 +18,7 @@ function RequestGitHub(issue, owner, repo) {
          * @param requestParams
          */
         issue: issue,
-        client: GitHubClient(owner,repo),
+        client: GitHubClient(owner, repo),
         handleAction: function (requestParams) {
             switch (requestParams.action) {
                 case 'create_branch':

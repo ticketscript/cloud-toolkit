@@ -51,15 +51,19 @@ function GitHubClient(owner, repo) {
                         'sha': response.object.sha
                     };
 
-                    self.call('POST', '/repos/' + self.owner + '/' + self.repo + '/git/refs', branchReference, function(status, response) {
-                        switch (status) {
-                            case 201:
-                                logger.info(response.ref + ' created in GitHub');
-                                break;
-                            default:
-                                logger.warn('Status code: ' + status + ', message: ' + response);
+                    self.call(
+                        'POST', '/repos/' + self.owner + '/' + self.repo + '/git/refs',
+                        branchReference,
+                        function(status, response) {
+                            switch (status) {
+                                case 201:
+                                    logger.info(response.ref + ' created in GitHub');
+                                    break;
+                                default:
+                                    logger.warn('Status code: ' + status + ', message: ' + response);
+                            }
                         }
-                    });
+                    );
                 });
             });
         },
@@ -109,18 +113,23 @@ function GitHubClient(owner, repo) {
          * @param {string} branchName the name to be deleted
          */
         deleteBranchIfMerged: function (base, head) {
-            self.isBranchMerged(base, head, function(isMerged){
+            self.isBranchMerged(base, head, function(isMerged) {
                 if(isMerged) {
                     logger.info('Deleting fully merged branch ' + head);
-                    self.call('DELETE', '/repos/' + self.owner + '/' + self.repo + '/git/refs/heads/' + head, null, function(status, response){
-                        switch (status) {
-                            case 204:
-                                logger.info('Branch ' + head + ' deleted from GitHub');
-                                break;
-                            default:
-                                logger.warn('Status code: ' + status + ', response: ' + response);
+                    self.call(
+                        'DELETE',
+                        '/repos/' + self.owner + '/' + self.repo + '/git/refs/heads/' + head, 
+                        null,
+                        function(status, response){
+                            switch (status) {
+                                case 204:
+                                    logger.info('Branch ' + head + ' deleted from GitHub');
+                                    break;
+                                default:
+                                    logger.warn('Status code: ' + status + ', response: ' + response);
+                            }
                         }
-                    });
+                    );
                 } else {
                     logger.error(head + ' is not fully merged with ' + base);
                 }
@@ -138,7 +147,8 @@ function GitHubClient(owner, repo) {
         },
 
         /**
-         * make a comparison to see if one branch has been merged into another. Then
+         * make a comparison to see if one branch has been merged into another. Callback is used to
+         * propagate results.
          *
          * @param {string} base  the base branch
          * @param {string} head  the branch we comparing to the base

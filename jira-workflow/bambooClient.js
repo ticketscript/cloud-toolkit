@@ -11,8 +11,8 @@ function BambooClient() {
         /**
          * hostname && auth credentials, from an git-ignored config object
          */
-        HOSTNAME: 			Config.atlassian.hostname,
-        AUTHCREDENTIALS: 	Config.atlassian.username + ':' + Config.atlassian.pass,
+        HOSTNAME:           Config.atlassian.hostname,
+        AUTHCREDENTIALS:    Config.atlassian.username + ':' + Config.atlassian.pass,
 
         /**
          * trigger the build service
@@ -30,17 +30,17 @@ function BambooClient() {
             // Retrieve plan and parse response
             self.retrievePlanBranches(plan, function(status, response) {
 
-            	var buildPlanBranch;
+                var buildPlanBranch;
 
-            	// Parse plan branches
-            	buildPlanBranch = self.findBranch(response, branch);
+                // Parse plan branches
+                buildPlanBranch = self.findBranch(response, branch);
                 if (!buildPlanBranch) {
                     //TODO: throw error?
                     logger.error('Plan branch ' + branch + ' not found, could not trigger build.');
                     return;
                 }
                 self.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
-			});
+            });
         },
         /**
          * Register given branch as a plan branch, unless it is already registered.
@@ -76,10 +76,10 @@ function BambooClient() {
          * @param {function} callback: callback function for parsed response
          */
         retrievePlanBranches: function(plan, callback) {
-        	var url = '/rest/api/latest'
-        			+ '/plan/' + plan + '.json?expand=branches&max-results=1000';
+            var url = '/rest/api/latest'
+                + '/plan/' + plan + '.json?expand=branches&max-results=1000';
 
-        	self.call('GET', url, null, callback);
+            self.call('GET', url, null, callback);
         },
 
         /**
@@ -90,10 +90,10 @@ function BambooClient() {
          */
         findBranch: function(response, branch) {
             for (var id in response['branches']['branch']) {
-            	var buildPlanBranch = response['branches']['branch'][id];
+                var buildPlanBranch = response['branches']['branch'][id];
 
                 if (branch == buildPlanBranch['shortName']) {
-		           	// the build plan branch exists
+                    // the build plan branch exists
                     return buildPlanBranch;
                 }
             }
@@ -107,9 +107,9 @@ function BambooClient() {
          */
         registerPlanBranch: function(plan, branch, callback) {
             var url = '/rest/api/latest'
-                    + '/plan/' + plan
-                    + '/branch/' + branch + '.json'
-                    + '?vcsBranch='+ branch;
+                + '/plan/' + plan
+                + '/branch/' + branch + '.json'
+                + '?vcsBranch='+ branch;
 
             // register branch
             self.call('PUT', url, null, callback);
@@ -128,14 +128,15 @@ function BambooClient() {
 
             // Execute only one stage if a stage was specified
             if (buildPlanStage) {
-            	planBuildUrl += '?stage=' + buildPlanStage + '&executeAllStages=false';
+                planBuildUrl += '?stage=' + buildPlanStage + '&executeAllStages=false';
             }
 
             logger.info('Queueing build ' + buildPlanKey
-                                        + (buildPlanStage ? ', stage ' + buildPlanStage : '')
-                                        + ' for branch ' + branchName);
-        	// Queue build
-            self.call('POST', planBuildUrl, postData, function(status, response){
+                + (buildPlanStage ? ', stage ' + buildPlanStage : '')
+                + ' for branch ' + branchName);
+
+            // Queue build
+            self.call('POST', planBuildUrl, postData, function(status, response) {
                 switch (status){
                     case 400:
                         logger.error(response.message);
@@ -161,26 +162,26 @@ function BambooClient() {
             var body = body || '';
 
             var options = {
-	                hostname:   self.HOSTNAME,
-	                path: 		Config.atlassian.pathPrefix + url,
-	                method: 	method,
-	                agent: 		false,
-	                auth: 		self.AUTHCREDENTIALS,
-	                headers: 	{
-				                	'X-Atlassian-Token': 'nocheck',
-				                    'Content-Length': body.length
-				                }
-	            };
+                    hostname:   self.HOSTNAME,
+                    path:       Config.atlassian.pathPrefix + url,
+                    method:     method,
+                    agent:      false,
+                    auth:       self.AUTHCREDENTIALS,
+                    headers:    {
+                                    'X-Atlassian-Token': 'nocheck',
+                                    'Content-Length': body.length
+                                }
+                };
 
-	        // Start HTTPS request
+            // Start HTTPS request
             var req = https.request(options, function (res) {
                 logger.debug('Outgoing Request - Bamboo');
                 logger.debug('URL: ' + options.path);
                 logger.debug('Method: ' + options.method);
-            	var res,
-            		response = '';
+                var res,
+                    response = '';
 
-            	// Collect data chunks into response
+                // Collect data chunks into response
                 res.on('data', function (chunk) {
                     response += chunk;
                 });
@@ -204,12 +205,12 @@ function BambooClient() {
 
             // Write request BODY
             if (body.length > 0) {
-            	req.write(body);
+                req.write(body);
             }
 
             // Add error handler
             req.on('error', function (err) {
-            	var err;
+                var err;
 
                 logger.error('' + err);
             });

@@ -93,7 +93,7 @@ function GitHubClient(owner, repo) {
                             break;
                         case 422:
                             for (var i = 0; i < response.errors.length; i++) {
-                                logger.warn('Error ' + i + ': ' + response.errors[i].message);
+                                logger.error(i + ': ' + response.errors[i].message);
                             }
                             break;
                         default:

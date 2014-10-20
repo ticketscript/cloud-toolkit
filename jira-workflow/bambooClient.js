@@ -59,7 +59,7 @@ function BambooClient() {
                     logger.info('Registering branch ' + branch + ' at Bamboo project ' + plan);
                     self.registerPlanBranch(plan, branch, function(status, response) {
                         if (status == 200) {
-                            logger.info('Registered branch ' + response.shortName + 'at Bamboo project ' + response.key);
+                            logger.info('Registered branch ' + response.shortName + ' at Bamboo project ' + response.key);
                         } else {
                             logger.warn('Status code: ' + status + ', message: ' + response.message);
                         }

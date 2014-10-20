@@ -5,12 +5,7 @@ var Config       = require('./config.js');
  * Constructor
  */
 function GitHubClient(owner, repo) {
-
-    var owner, repo;
     var self = {
-
-        headBranch: 'v',
-
         /**
          * hostname && auth credentials
          */
@@ -24,41 +19,46 @@ function GitHubClient(owner, repo) {
         /**
          * create a branch in git based on master
          *
-         * @param {string} branchName the name to be created
-         * @param {string} branchStart branch to fork from (default master)
+         * @param {string} branch: the name to be created
+         * @param {string} reference: branch to fork from
          */
-        createBranch: function(branchName, reference) {
+        createBranch: function(branch, reference) {
 
-            var branchName, reference,
-                branchReference, branchStart, baseReference;
+            var branchReference;
 
             // Check if branch already exists first
-            self.retrieveReference('heads/' + branchName, function(branchReference) {
+            self.retrieveReference('heads/' + branch, function(branchReference) {
 
                 if (branchReference.ref) {
-                    logger.warn('Branch ' + branchName + ' already exists');
+                    logger.warn('Branch ' + branch + ' already exists');
                     return;
                 }
 
-                logger.info('Creating Branch ' + branchName + ' on ' + self.owner + '/' + self.repo + ' from ' + reference);
+                logger.info('Creating Branch ' + branch + ' on ' + self.owner + '/' + self.repo + ' from ' + reference);
 
                 // Retrieve master branch SHA
-                self.retrieveReference(reference, function(baseReference) {
-                    if (!baseReference.object) {
+                self.retrieveReference(reference, function(status, response) {
+                    if (!response.object) {
                         logger.error('Reference ' + reference + ' does not exist');
                         return;
                     }
 
-                    logger.info(reference + ' is at ' + baseReference.object.sha);
+                    logger.info(reference + ' is at ' + response.object.sha);
 
                     // Create new branch base reference
                     branchReference = {
-                        'ref': 'refs/heads/' + branchName,
-                        'sha': baseReference.object.sha
+                        'ref': 'refs/heads/' + branch,
+                        'sha': response.object.sha
                     };
 
-                    self.call('POST', '/repos/' + self.owner + '/' + self.repo + '/git/refs', branchReference, function() {
-                        logger.info(branchReference.ref + ' created');
+                    self.call('POST', '/repos/' + self.owner + '/' + self.repo + '/git/refs', branchReference, function(status, response) {
+                        switch (status) {
+                            case 201:
+                                logger.info(response.ref + ' created in GitHub');
+                                break;
+                            default:
+                                logger.warn('Status code: ' + status + ', message: ' + response);
+                        }
                     });
                 });
             });
@@ -86,8 +86,19 @@ function GitHubClient(owner, repo) {
                 'POST',
                 '/repos/' + self.owner + '/' + self.repo + '/pulls',
                 data,
-                function(response) {
-                    logger.info('Pull request created for ' + head + ' into ' + base);
+                function(status, response) {
+                    switch (status) {
+                        case 201:
+                            logger.info('Pull request created for ' + head + ' into ' + base);
+                            break;
+                        case 422:
+                            for (var i = 0; i < response.errors.length; i++) {
+                                logger.warn('Error ' + i + ': ' + response.errors[i].message);
+                            }
+                            break;
+                        default:
+                            logger.warn('Status code: ' + status + ', response: ' + response);
+                    }
                 }
             );
         },
@@ -101,7 +112,15 @@ function GitHubClient(owner, repo) {
             self.isBranchMerged(base, head, function(isMerged){
                 if(isMerged) {
                     logger.info('Deleting fully merged branch ' + head);
-                    self.call('DELETE', '/repos/' + self.owner + '/' + self.repo + '/git/refs/heads/' + head);
+                    self.call('DELETE', '/repos/' + self.owner + '/' + self.repo + '/git/refs/heads/' + head, null, function(status, response){
+                        switch (status) {
+                            case 204:
+                                logger.info('Branch ' + head + ' deleted from GitHub');
+                                break;
+                            default:
+                                logger.warn('Status code: ' + status + ', response: ' + response);
+                        }
+                    });
                 } else {
                     logger.error(head + ' is not fully merged with ' + base);
                 }
@@ -115,7 +134,6 @@ function GitHubClient(owner, repo) {
          * @param {function} callback   callback function
          */
         retrieveReference: function(reference, callback) {
-            var branchName, reference;
             self.call('GET', '/repos/' + self.owner + '/' + self.repo + '/git/refs/' + reference, null, callback);
         },
 
@@ -131,9 +149,14 @@ function GitHubClient(owner, repo) {
                 'GET',
                 '/repos/' + self.owner + '/' + self.repo + '/compare/' + base + '...' + head,
                 null,
-                function(parsedResponse) {
-                    isMerged = parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0;
-                    callback(isMerged);
+                function(status, response) {
+                    //TODO make error more generic!
+                    if (status == 404){
+                        logger.warn('Status: ' + status + ', message: ' + response.message);
+                    } else {
+                        isMerged = response['ahead_by'] === 0 && response['total_commits'] === 0;
+                        callback(isMerged);
+                    }
             });
         },
 
@@ -170,33 +193,25 @@ function GitHubClient(owner, repo) {
             logger.debug('URL: ' + options.path);
             logger.debug('Method: ' + options.method);
             var req = https.request(options, function (res) {
-                var res,
-                    response = '';
+                var response = '',
+                    parsedResponse = {};
 
                 // Collect data chunks into response
                 res.on('data', function (chunk) {
                     response += chunk;
                 });
 
-                // Add response handler
                 // Response handler
                 res.on('end', function() {
                     logger.debug('Incoming Response - GitHub');
                     logger.debug('Status code: ' + res.statusCode);
                     logger.debug('Body: ' + response);
-                    if (response.length > 0)
-                        var parsedResponse = JSON.parse(response);
-                    
-                    if (res.statusCode >= 200 && res.statusCode < 300) {
+                    if (response.length > 0) {
+                        parsedResponse = JSON.parse(response);
+                    }
 
-                        // Pass parsed JSON response to callback function
-                        callback(parsedResponse);
-
-                    } else {
-                        if (res.statusCode == 404) {
-                            callback({});
-                        }
-                        logger.warn('Status code: ' + res.statusCode + ', message: ' + parsedResponse['message']);
+                    if (callback) {
+                        callback(res.statusCode, parsedResponse);
                     }
                 });
             });

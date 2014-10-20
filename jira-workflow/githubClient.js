@@ -97,10 +97,15 @@ function GitHubClient(owner, repo) {
          *
          * @param {string} branchName the name to be deleted
          */
-        deleteBranch: function (branchName) {
-            var branchName;
-
-            self.call('DELETE', '/repos/' + self.owner + '/' + self.repo + '/git/refs/heads/' + branchName);
+        deleteBranchIfMerged: function (base, head) {
+            self.isBranchMerged(base, head, function(isMerged){
+                if(isMerged) {
+                    logger.info('Deleting fully merged branch ' + head);
+                    self.call('DELETE', '/repos/' + self.owner + '/' + self.repo + '/git/refs/heads/' + head);
+                } else {
+                    logger.error(head + ' is not fully merged with ' + base);
+                }
+            });
         },
 
         /**
@@ -115,31 +120,21 @@ function GitHubClient(owner, repo) {
         },
 
         /**
-         * make a comparison to see if one branch has been merged into another
+         * make a comparison to see if one branch has been merged into another. Then
          *
          * @param {string} base  the base branch
          * @param {string} head  the branch we comparing to the base
-         *
-         * @return {boolean}
+         * @param {function} callback function
          */
-        isBranchMerged: function(base, head) {
-
-            var isMerged = false;
-
+        isBranchMerged: function(base, head, callback) {
             self.call(
                 'GET',
                 '/repos/' + self.owner + '/' + self.repo + '/compare/' + base + '...' + head,
                 null,
                 function(parsedResponse) {
-                    if (parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0) {
-                        isMerged = true;
-                        self.deleteBranch(self.owner, self.repo, head);
-                    } else {
-                        isMerged = false;
-                    }
+                    isMerged = parsedResponse['ahead_by'] === 0 && parsedResponse['total_commits'] === 0;
+                    callback(isMerged);
             });
-
-            return isMerged;
         },
 
         /**
@@ -171,10 +166,10 @@ function GitHubClient(owner, repo) {
             };
 
             // Start HTTPS request
+            logger.debug('Outgoing Request - GitHub');
+            logger.debug('URL: ' + options.path);
+            logger.debug('Method: ' + options.method);
             var req = https.request(options, function (res) {
-                logger.debug('Outgoing Request - GitHub');
-                logger.debug('URL: ' + options.path);
-                logger.debug('Method: ' + options.method);
                 var res,
                     response = '';
 
@@ -189,7 +184,9 @@ function GitHubClient(owner, repo) {
                     logger.debug('Incoming Response - GitHub');
                     logger.debug('Status code: ' + res.statusCode);
                     logger.debug('Body: ' + response);
-                    var parsedResponse = JSON.parse(response);
+                    if (response.length > 0)
+                        var parsedResponse = JSON.parse(response);
+                    
                     if (res.statusCode >= 200 && res.statusCode < 300) {
 
                         // Pass parsed JSON response to callback function

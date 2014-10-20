@@ -29,4 +29,24 @@ Config.github.hostname= 'api.github.com';
 Config.github.username = 'yourUsername';
 Config.github.pass= 'yourPassword';
 
+/**
+ * logging configuration
+ *
+ * The following logging levels are available:
+ * - debug
+ * - info
+ * - warn
+ * - error
+ *
+ */
+Config.log = {};
+Config.log.enable = false;
+Config.log.console = {};
+Config.log.console.enable = false;
+Config.log.console.level = 'info';
+Config.log.file = {};
+Config.log.file.enable = false;
+Config.log.file.level = 'info';
+Config.log.file.path = 'logfile.log';
+
 module.exports = Config;

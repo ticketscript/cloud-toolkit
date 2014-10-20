@@ -9,12 +9,22 @@ var nock = require('nock');
 var gitHubMock = nock('https://' + Config.github.hostname);
 var jsonFixtures = require('./fixtures/jsonGithub');
 var requestGitHub = require('../requestGitHub');
-var gitHubHandler = requestGitHub();
+
 var testParent = 'TST-00';
 var testBranch = 'TST-01';
 var testOwner = 'testOwner';
 var testRepo = 'testRepo';
-
+var testIssue = {
+	key: testBranch,
+	fields: {
+		parent: {
+			key: testParent
+		},
+		summary: 'Test summary',
+		description: 'Test description'
+	}
+};
+var gitHubHandler = requestGitHub(testIssue, testOwner, testRepo);
 // Test if Handler responds to the action create_branch
 exports['testCreateNotExistingBranch'] = function (test) {
 	test.expect(1);
@@ -27,19 +37,12 @@ exports['testCreateNotExistingBranch'] = function (test) {
 		  .post('/repos/' + testOwner + '/' + testRepo + '/git/refs')
 		  .reply(201,jsonFixtures.resBranchCreated);
 
-	gitHubHandler.setIssue(testBranch);
-	gitHubHandler.handleAction('create_branch',{
+	gitHubHandler.handleAction({
+		action: 'create_branch',
 		owner: testOwner,
 		repo: testRepo,
 		branchName: testBranch,
-		issue: {
-			key: testBranch,
-			fields: {
-				parent: {
-					key: testParent
-				}
-			}
-		}
+		issue: testIssue
 	});
 	// check that all expected communication has taken place
 	setTimeout(function() {

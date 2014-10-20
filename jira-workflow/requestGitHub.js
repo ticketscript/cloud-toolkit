@@ -4,40 +4,23 @@ var GitHubClient = require('./githubClient');
 /*
  * ConstructorRequestHandler
  */
-function RequestGitHub() {
+function RequestGitHub(issue, owner, repo) {
+    // Check if issue exists
+    if (typeof issue != 'object') {
+        throw errorMessage.invalidRequest('Issue details are missing in POST request body');
+    }
 
-    var self = {
-
-        client: null,
-        issue:  null,
-
-        getIssue: function() {
-            // Check if issue exists
-            if (typeof self.issue != 'object') {
-                throw errorMessage.invalidRequest('Issue details are missing in POST request body');
-            }
-
-            return self.issue;
-        },
-
-        setIssue: function (issue) {
-            var issue;
-
-            self.issue = issue;
-        },
-
+    var requestGitHub = {
         /**
          * handle the action
          *
          * @param action
          * @param requestParams
          */
-        handleAction: function (action, requestParams) {
-
-            // Construct GitHub API client
-            this.client = new GitHubClient(requestParams.owner, requestParams.repo);
-
-            switch (action) {
+        issue: issue,
+        client: GitHubClient(owner, repo),
+        handleAction: function (requestParams) {
+            switch (requestParams.action) {
                 case 'create_branch':
                     this.createBranch(requestParams);
                     break;
@@ -46,8 +29,8 @@ function RequestGitHub() {
                     this.createPullRequest(requestParams);
                     break;
 
-                case 'complete_subtask':
-                    this.completeSubtask(requestParams);
+                case 'delete_branch':
+                    this.deleteBranch(requestParams);
                     break;
 
                 default:
@@ -72,7 +55,7 @@ function RequestGitHub() {
 
                 case 'parent':
                     // Fork from issues parent branch
-                    reference = 'heads/' + this.getIssue().fields.parent.key;
+                    reference = 'heads/' + this.issue.fields.parent.key;
                     break;
 
                 default:
@@ -90,40 +73,37 @@ function RequestGitHub() {
          * @param requestParams
          */
         createPullRequest: function (requestParams) {
-            var requestParams,
-                issue = this.getIssue();
-
-            var base = issue.fields.parent.key,
-                head = requestParams.head,
-                title = requestParams.head + issue.fields.title,
-                description = 'description';
+            var base = this.issue.fields.parent.key,
+                // No cross-repository pull requests for now
+                head = this.issue.key,
+                title = this.issue.fields.summary,
+                description = this.issue.fields.description;
 
             // Create the pull request
             this.client.createPullRequest(base, head, title, description);
         },
 
         /**
-         * complete the subtask
+         * Delete a branch, if fully merged.
          *
          * @param requestParams
          */
-        completeSubtask: function (requestParams) {
-            var requestParams,
-                base = this.getIssue().fields.parent.key,
-                head = requestParams.head;
+        deleteBranch: function (requestParams) {
+            var base,
+                head = this.issue.key;
 
-            // Check if sub task has is fully merged into base
-            if (this.client.isBranchMerged(base, head)) {
-                console.info('Deleting fully merged branch ' + head);
-                // Delete sub task branch
-                this.client.deleteBranch(head);
+            if (this.issue.fields.parent) {
+                // Request coming from a technical task
+                base = this.issue.fields.parent.key;
             } else {
-                console.error(head + ' is not fully merged with ' + base);
+                base = 'heads/master';
             }
+
+            this.client.deleteBranchIfMerged(base, head);
         }
     }
 
-    return self;
+    return requestGitHub;
 };
 
 module.exports = RequestGitHub

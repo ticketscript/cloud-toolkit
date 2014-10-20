@@ -30,8 +30,7 @@ RequestHandler.prototype.handleRequest = function (request, response) {
                 break;
 
             case 'github':
-                var handler = new requestGitHub();
-                handler.setIssue(request.body.issue);
+                var handler = new requestGitHub(request.body.issue, request.params.owner, request.params.repo);
                 break;
 
             default:
@@ -39,7 +38,7 @@ RequestHandler.prototype.handleRequest = function (request, response) {
         }
 
         // Handle the request
-        responseJson.result = handler.handleAction(request.params.action, request.params);
+        responseJson.result = handler.handleAction(request.params);
 
     } catch (err) {
         console.error(err);

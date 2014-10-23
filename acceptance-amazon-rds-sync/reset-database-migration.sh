@@ -11,7 +11,7 @@ DIR=`dirname $0`
 source $DIR/config
 
 # Reset 'migration' folder to origin/master
-cd $DATABASE_MIGRATION_SOURCE_DIR && git stash && git fetch -q origin && git checkout -q origin/master
+cd $DATABASE_MIGRATION_SOURCE_DIR && git stash && git fetch -q origin && git checkout -q master
 
 # Backup previous sql-processed folder
 if [ -d $DATABASE_MIGRATION_TARGET_DIR ]; then

@@ -17,6 +17,24 @@ var testBuild = 'TSP-TST00';
 
 var bambooHandler = requestBamboo(testBranch);
 
+// Test if invalid issue keys from JIRA throw an Error
+exports['testTriggerInvalidBranch'] = function (test) {
+    test.expect(1);
+
+    var bambooHandler = requestBamboo("${issue.key}");
+    test.throws(
+        function () {
+            bambooHandler.handleAction( {
+                action: 'trigger',
+                project: testProject
+            });
+        },
+        Error,
+        'Invalid issue key format: ${issue.key}'
+    );
+
+    test.done();
+}
 // Test if Handler responds to the action Trigger
 exports['testTriggerNonExistingBranch'] = function (test) {
     test.expect(2);
@@ -28,7 +46,7 @@ exports['testTriggerNonExistingBranch'] = function (test) {
     test.equal(bambooHandler.issueKey, testBranch);
     bambooHandler.handleAction({
         action: 'trigger',
-        project: 'testProject'
+        project: testProject
     });
 
     // check that all expected communication has taken place
@@ -51,7 +69,7 @@ exports['testTriggerExistingBranch'] = function (test) {
 
     bambooHandler.handleAction({
         action: 'trigger',
-        project: 'testProject'
+        project: testProject
     });
 
     // check that all expected communication has taken place

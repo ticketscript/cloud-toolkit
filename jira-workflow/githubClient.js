@@ -23,9 +23,6 @@ function GitHubClient(owner, repo) {
          * @param {string} reference: branch to fork from
          */
         createBranch: function(branch, reference) {
-
-            var branchReference;
-
             // Check if branch already exists first
             self.retrieveReference('heads/' + branch, function(branchReference) {
 
@@ -76,8 +73,6 @@ function GitHubClient(owner, repo) {
          * @param {string} description of the pull request
          */
         createPullRequest: function (base, head, title, description) {
-            var base, head, title, description;
-
             var data = {
                 title: title,
                 body: description,
@@ -179,9 +174,7 @@ function GitHubClient(owner, repo) {
          * @param {function} callback function when request completes
          */
         call: function(method, path, body, callback) {
-            var method,
-                path,
-                body = body ? JSON.stringify(body) : '',
+            var body = body ? JSON.stringify(body) : '',
                 callback = callback || function() { };
 
             var headers = {

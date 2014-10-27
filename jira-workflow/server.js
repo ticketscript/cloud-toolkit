@@ -21,7 +21,6 @@ var handler = new RequestHandler();
 // Init Express and request body parser
 var app = express();
 
-//TODO remove extra logging
 app.use(bodyParser.json(),function(req, res, next) {
 	logger.debug('Incoming request');
 	logger.debug('Method:', req.method);

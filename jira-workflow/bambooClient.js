@@ -178,8 +178,8 @@ function BambooClient() {
                 logger.debug('Outgoing Request - Bamboo');
                 logger.debug('URL: ' + options.path);
                 logger.debug('Method: ' + options.method);
-                var res,
-                    response = '';
+
+                var response = '';
 
                 // Collect data chunks into response
                 res.on('data', function (chunk) {

@@ -14,6 +14,7 @@ var testRepo = 'testRepo';
 var testBaseBranch = 'TST-00';
 var testHeadBranch = 'TST-01';
 var githubClient = new GitHubClient(testOwner, testRepo);
+var jsonFixtures = require('./fixtures/jsonGithub');
 
 exports['testIsBranchMergedFullyMerged'] = function (test) {
     test.expect(2);
@@ -80,6 +81,22 @@ exports['testCreatePullRequest'] = function (test) {
         .reply(201, {});
 
     githubClient.createPullRequest(testBaseBranch, testHeadBranch, 'testTitle', 'testDescription');
+
+    setTimeout(function() {
+        test.ok(gitHubMock.isDone(), 'Remaining mocks: ' + gitHubMock.pendingMocks());
+        test.done();
+        nock.cleanAll();
+    }, 1000);
+}
+
+exports['testSuccessfulMerge'] = function (test) {
+    test.expect(1);
+
+    // successful merge
+    gitHubMock.post('/repos/' + testOwner + '/' + testRepo + '/merges')
+        .reply(201, jsonFixtures.resSuccessfulMerge);
+
+    githubClient.mergeBranch(testBaseBranch, testHeadBranch, 'Merging!');
 
     setTimeout(function() {
         test.ok(gitHubMock.isDone(), 'Remaining mocks: ' + gitHubMock.pendingMocks());

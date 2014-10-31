@@ -33,6 +33,10 @@ function RequestGitHub(issue, owner, repo) {
                     this.deleteBranch(requestParams);
                     break;
 
+                case 'merge_branch':
+                    this.mergeBranch(requestParams);
+                    break;
+
                 default:
                     throw errorMessage.invalidRequest('Unknown github action: ' + action);
             }
@@ -101,6 +105,21 @@ function RequestGitHub(issue, owner, repo) {
             }
 
             this.client.deleteBranchIfMerged(base, head);
+        },
+
+        /**
+         * Merge a branch to another
+         * @param  requestParams
+         */
+        mergeBranch: function (requestParams) {
+            var base = requestParams.mergeTarget,
+                head = this.issue.key;
+
+            if (base == undefined) {
+                throw errorMessage.invalidRequest('MergeBranch: missing merge target');
+            }
+
+            this.client.mergeBranch(base, head);
         }
     }
 

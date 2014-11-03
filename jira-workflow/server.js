@@ -41,6 +41,8 @@ app.route('/jira/:type(github)/:action(create_branch)/:owner/:repo/:branchName')
 app.route('/jira/:type(github)/:action(create_branch)/:owner/:repo/:branchName/:forkFrom').post(handler.handleRequest);
 app.route('/jira/:type(github)/:action(create_pull_request)/:owner/:repo/:branchName').post(handler.handleRequest);
 app.route('/jira/:type(github)/:action(delete_branch)/:owner/:repo/:branchName').post(handler.handleRequest);
+app.route('/jira/:type(github)/:action(merge_branch)/:owner/:repo/:branchName/:mergeTarget').post(handler.handleRequest);
+
 // Start server
 app.listen(Config.app.port);
 

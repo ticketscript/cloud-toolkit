@@ -1,0 +1,17 @@
+{
+	"branches":{
+		"size":1,
+		"expand":"branch",
+		"start-index": 0,
+		"max-result": 11,
+		"branch":[
+		{
+			"description": "Test description",
+			"shortName": "TST-00",
+			"shortKey": "TST00",
+			"enabled": true,
+			"key": "testProject",
+			"name":"Test project - Test plan - Test branch"
+		}]
+	}
+}

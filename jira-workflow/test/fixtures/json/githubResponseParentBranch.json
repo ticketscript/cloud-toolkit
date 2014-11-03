@@ -1,0 +1,9 @@
+{
+	"ref": "refs/heads/TST-00",
+	"url":"https://server/repos/testOwner/testRepo/git/refs/headsTST-00",
+	"object":{
+		"sha": "123456",
+		"type": "commit",
+		"url": "https://server/repos/testOwner/testRepo/git/commits/123456"
+		}
+}

@@ -1,10 +1,18 @@
-var Config = require('./config')
+var Config = require('./config');
+
+var logLevels = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3
+};
+
 var logColors = {
-      info: 'green',
-      debug: 'purple',
-      warn: 'yellow',
-      error: 'red'
-    };
+  info: 'green',
+  debug: 'cyan',
+  warn: 'yellow',
+  error: 'red'
+};
 
 exports.init = function() {
   var winston = require('winston');
@@ -51,7 +59,7 @@ exports.init = function() {
         {
           message: 'middleware: ' + msg,
           token: this.token,
-          color: logColors[level]
+          color: logColors[level] == 'cyan'? 'purple' : logColors[level] // mismatch between winston and hipchat color
         },
         function(hipchatResponse){
           if (hipchatResponse != null)
@@ -70,6 +78,10 @@ exports.init = function() {
     transports.push(item);
   }
 
-  GLOBAL.logger = new (winston.Logger)({ transports: transports });
-  winston.addColors(logColors);
+  GLOBAL.logger = new (winston.Logger)({
+    transports: transports,
+    levels: logLevels,
+    colors: logColors
+  });
+
 };

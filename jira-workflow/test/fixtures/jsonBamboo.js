@@ -1,60 +1,17 @@
 var Config = require('../../config');
-var testBranch = 'TST-00';
-var testProject = 'testProject';
-var testStage = 'Define';
-var testBuild = 'TSP-TST00';
-var testShortKey = 'TST00';
-var resPlanBranchesIncludingTestBranch = {
-	branches:{
-		size:1,
-		expand:"branch",
-		"start-index": 0,
-		"max-result": 11,
-		branch:[
-		{
-			description: "Test description",
-			shortName: testBranch,
-			shortKey: testShortKey,
-			enabled: true,
-			link:{
-				href: Config.atlassian.hostname + Config.atlassian.pathPrefix + "rest/api/latest/plan/" + testShortKey,
-				rel: "self"
-			},
-			key: testProject,
-			name:"Test project - Test plan - Test branch"
-		}]
-	}
-};
+var fs = require('fs');
 
-var resPlanBranchesExcludingTestBranch = {
-	branches:{
-		size:0,
-		expand:"branch",
-		"start-index": 0,
-		"max-result": 11,
-		branch:[]
-	}
-};
+var resPlanBranchesIncludingTestBranch = fs.readFileSync('./test/fixtures/json/bambooPlanBranchesIncludingTestBranch.json','utf8');
+var resPlanBranchesExcludingTestBranch = fs.readFileSync('./test/fixtures/json/bambooPlanBranchesExcludingTestBranch.json','utf8');
 
-var resBranchSetVCSBranch = {
-  	description:"Test description",
-  	shortName: testBranch,
-  	shortKey: testShortKey,
-  	enabled:true,
-  	link:{
-  		href: Config.atlassian.hostname + Config.atlassian.pathPrefix + "rest/api/latest/plan/" + testBuild,
-  		rel:"self"
-  	},
-  	key: testBuild,
-  	name:"Test project - Test plan - Test branch"
-};
+var resBranchSetVCSBranch = fs.readFileSync('./test/fixtures/json/bambooBranchSetVCSBranch.json', 'utf8');
 
 var resQueueBuild = {
 	message:"Build requested but not started, you have reached the maximum number of concurrent builds allowed.",
 	"status-code":400
 };
 
-exports.resPlanBranchesExcludingTestBranch = resPlanBranchesExcludingTestBranch;
-exports.resPlanBranchesIncludingTestBranch = resPlanBranchesIncludingTestBranch;
+exports.resPlanBranchesExcludingTestBranch = JSON.parse(resPlanBranchesExcludingTestBranch);
+exports.resPlanBranchesIncludingTestBranch = JSON.parse(resPlanBranchesIncludingTestBranch);
 exports.resBranchSetVCSBranch = resBranchSetVCSBranch;
 exports.resQueueBuild = resQueueBuild;

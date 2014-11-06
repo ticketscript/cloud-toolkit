@@ -10,19 +10,19 @@ var resParentBranch = {
 	ref:'refs/heads/' + testParent,
 	url:'https://' + Config.github.hostname + '/repos/' + testOwner + '/' + testRepo + '/git/refs/heads/'+ testParent,
 	object:{
-		sha:testSHA1,
-		type:"commit",
-		url:'https://' + Config.github.hostname + '/repos/' + testOwner + '/' + testRepo + '/git/commits/' + testSHA1
+		sha: testSHA1,
+		type: "commit",
+		url: 'https://' + Config.github.hostname + '/repos/' + testOwner + '/' + testRepo + '/git/commits/' + testSHA1
 	}
 }
 
 var resBranchCreated = {
-	ref:'refs/heads/' + testBranch,
-	url:'https://' + Config.github.hostname + '/repos/' + testOwner + '/' + testRepo + '/git/refs/heads/'+ testBranch,
+	ref: 'refs/heads/' + testBranch,
+	url: 'https://' + Config.github.hostname + '/repos/' + testOwner + '/' + testRepo + '/git/refs/heads/'+ testBranch,
 	object:{
-		sha:testSHA1,
-		type:"commit",
-		url:'https://' + Config.github.hostname + '/repos/' + testOwner + '/' + testRepo + '/git/commits/' + testSHA1
+		sha: testSHA1,
+		type: "commit",
+		url: 'https://' + Config.github.hostname + '/repos/' + testOwner + '/' + testRepo + '/git/commits/' + testSHA1
 	}
 }
 

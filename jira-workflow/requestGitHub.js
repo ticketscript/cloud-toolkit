@@ -76,6 +76,7 @@ function RequestGitHub(issue, owner, repo) {
             var base = this.issue.fields.parent.key,
                 // No cross-repository pull requests for now
                 head = this.issue.key,
+                // TODO: use format (parent key/)issue key: summary
                 title = this.issue.fields.summary,
                 description = this.issue.fields.description;
 

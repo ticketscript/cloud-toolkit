@@ -1,4 +1,10 @@
 var Config = require('./config')
+var logColors = {
+      info: 'green',
+      debug: 'purple',
+      warn: 'yellow',
+      error: 'red'
+    };
 
 exports.init = function() {
   var winston = require('winston');
@@ -22,12 +28,48 @@ exports.init = function() {
     transports.push(item);
   }
 
+  if (Config.log.hipchat.enable) {
+    var hipchatter = require('hipchatter');
+    var hipchat = new hipchatter(Config.log.hipchat.token);
+
+    // custom transport for hipchat based on hipchatter module
+    var util = require('util');
+
+    var hipchatLogger = winston.transports.Hipchat = function (options) {
+      this.name = 'hipchatLogger';
+      this.level = options.level || 'info';
+      this.token = options.token;
+      this.room = options.room;
+      this.format = options.format || 'text';
+    };
+    util.inherits(hipchatLogger, winston.Transport);
+
+    hipchatLogger.prototype.log = function (level, msg, meta, callback) {
+      // this will list all of your rooms
+      hipchat.notify(
+        this.room,
+        {
+          message: 'middleware: ' + msg,
+          token: this.token,
+          color: logColors[level]
+        },
+        function(hipchatResponse){
+          if (hipchatResponse != null)
+            console.log(hipchatResponse);
+        });
+
+      callback(null, true);
+    };
+
+    // add custom transport to winston
+    var item = new (winston.transports.Hipchat)({
+      level: Config.log.hipchat.level,
+      token: Config.log.hipchat.token,
+      room: Config.log.hipchat.room,
+    });
+    transports.push(item);
+  }
+
   GLOBAL.logger = new (winston.Logger)({ transports: transports });
-  var logColors = {
-        info: 'blue',
-        debug: 'green',
-        warn: 'yellow',
-        error: 'red'
-      };
   winston.addColors(logColors);
 };

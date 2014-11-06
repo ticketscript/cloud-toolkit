@@ -31,6 +31,10 @@ Config.github.pass= 'yourPassword';
 
 /**
  * logging configuration
+ * The following channels are available:
+ * - console
+ * - file
+ * - hipchat
  *
  * The following logging levels are available:
  * - debug
@@ -48,5 +52,8 @@ Config.log.file = {};
 Config.log.file.enable = false;
 Config.log.file.level = 'info';
 Config.log.file.path = 'logfile.log';
-
+Config.log.hipchat.enable = false;
+Config.log.hipchat.level = 'info';
+Config.log.hipchat.token = '123token';
+Config.log.hipchat.room = 'room_name';
 module.exports = Config;

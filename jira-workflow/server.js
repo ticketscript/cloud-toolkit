@@ -34,6 +34,7 @@ app.use(bodyParser.json(),function(req, res, next) {
 app.route('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project').post(handler.handleRequest);
 app.route('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage').post(handler.handleRequest);
 app.route('/jira/:issueKey/:type(bamboo)/:action(register)/:project').post(handler.handleRequest);
+app.route('/jira/:issueKey/:type(bamboo)/:action(release)/:project').post(handler.handleRequest);
 
 // GitHub routes
 app.route('/jira/:type(github)/:action/:repo/:head').post(handler.handleRequest);

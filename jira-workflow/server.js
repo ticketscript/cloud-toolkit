@@ -34,6 +34,7 @@ app.use(bodyParser.json(),function(req, res, next) {
 app.route('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project').post(handler.handleRequest);
 app.route('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage').post(handler.handleRequest);
 app.route('/jira/:issueKey/:type(bamboo)/:action(register)/:project').post(handler.handleRequest);
+app.route('/jira/:issueKey/:type(bamboo)/:action(release)/:project').post(handler.handleRequest);
 
 // GitHub routes
 app.route('/jira/:type(github)/:action/:repo/:head').post(handler.handleRequest);
@@ -41,6 +42,8 @@ app.route('/jira/:type(github)/:action(create_branch)/:owner/:repo/:branchName')
 app.route('/jira/:type(github)/:action(create_branch)/:owner/:repo/:branchName/:forkFrom').post(handler.handleRequest);
 app.route('/jira/:type(github)/:action(create_pull_request)/:owner/:repo/:branchName').post(handler.handleRequest);
 app.route('/jira/:type(github)/:action(delete_branch)/:owner/:repo/:branchName').post(handler.handleRequest);
+app.route('/jira/:type(github)/:action(merge_branch)/:owner/:repo/:branchName/:mergeTarget').post(handler.handleRequest);
+
 // Start server
 app.listen(Config.app.port);
 

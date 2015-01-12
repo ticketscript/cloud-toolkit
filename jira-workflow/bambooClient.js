@@ -25,10 +25,10 @@ function BambooClient() {
 
             var stage = stage || '';
 
-            logger.info('Trigger received for Bamboo project ' + plan + ' for branch ' + branch + ' and for stage ' + stage);
+            logger.info('Trigger received for Bamboo project ' + plan + ' for branch ' + branch + (stage ==='' ? '' : ' and for stage ' + stage));
 
             // Retrieve plan and parse response
-            self.retrievePlanBranches(plan, function(status, response) {
+            self.retrievePlanBranches(plan, function (status, response) {
 
                 var buildPlanBranch;
 
@@ -40,6 +40,32 @@ function BambooClient() {
                     return;
                 }
                 self.queuePlanBranch(buildPlanBranch.key, stage, buildPlanBranch.shortName);
+            });
+        },
+        /**
+         * trigger the build service and pass a custom variable as parameter
+         * @param  {string} plan: the name of the build plan
+         * @param  {string} variable: the custom variable
+         */
+        triggerProjectWithCustomVariable: function (plan, variable) {
+            logger.info('Trigger received for Bamboo project ' + plan + ' for default branch and with custom variable ' + variable);
+            // queue build with default branch and pass custom variable as data
+            var planBuildUrl = '/rest/api/latest/queue/' + plan + '.json';
+            var postData = {};
+            postData['bamboo.variable.userstory'] = variable;
+
+            // Queue build
+            self.call('POST', planBuildUrl, postData, function (status, response) {
+                switch (status) {
+                    case 400:
+                        logger.error(response.message);
+                        break;
+                    case 200:
+                        logger.info('Triggered build ' + response.buildResultKey);
+                        break;
+                    default:
+                        logger.warn('Trigger with custom variable - Status: ' + status + ', response: ' + response);
+                }
             });
         },
         /**
@@ -65,7 +91,7 @@ function BambooClient() {
                         }
                     });
                 } else {
-                    logger.info('Found existing branch (' + branch + ') for ' + plan);
+                    logger.info('Register branch at project - Found existing branch (' + branch + ') for ' + plan);
                 }
             });
         },
@@ -145,7 +171,7 @@ function BambooClient() {
                         logger.info('Triggered build ' + response.buildResultKey);
                         break;
                     default:
-                        logger.warn('Status: ' + status + ', response: ' + response);
+                        logger.warn('Queue plan branch - Status: ' + status + ', response: ' + response);
                 }
             });
         },
@@ -217,7 +243,7 @@ function BambooClient() {
 
             req.end();
         }
-    }
+    };
 
     return self;
 };

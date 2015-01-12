@@ -16,11 +16,11 @@ function RequestBamboo(issueKey) {
             var action = requestParams.action;
 
             //ITI-1800: validate issueKey
-            var validatedIssueKey = this.issueKey.match(/^\w+-\w+$/);
-            if (validatedIssueKey === null) {
+            var validatedIssueKeyMatch = this.issueKey.match(/^\w+-\w+$/);
+            if (validatedIssueKeyMatch === null) {
                 throw errorMessage.invalidRequest('Invalid issue key format: ' + this.issueKey);
             }
-
+            var validatedIssueKey = validatedIssueKeyMatch[0];
             switch (action) {
                 case 'trigger':
                     var project = requestParams['project'];
@@ -31,6 +31,12 @@ function RequestBamboo(issueKey) {
                 case 'register':
                     var project = requestParams['project'];
                     this.client.registerBranchAtProject(project, validatedIssueKey);
+                    break;
+                case 'release':
+                    // Trigger Bamboo release plan with issue key as parameter
+                    // (indicates the User Story to merge to the release branch)
+                    var project = requestParams['project'];
+                    this.client.triggerProjectWithCustomVariable(project, validatedIssueKey);
                     break;
                 default:
                     throw errorMessage.invalidRequest('Unknown bamboo action: ' + action);

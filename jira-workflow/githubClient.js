@@ -57,7 +57,7 @@ function GitHubClient(owner, repo) {
                                     logger.info(response.ref + ' created in GitHub');
                                     break;
                                 default:
-                                    logger.warn('Status code: ' + status + ', message: ' + response);
+                                    logger.warn('Create branch - status code: ' + status + ', message: ' + response);
                             }
                         }
                     );
@@ -96,7 +96,7 @@ function GitHubClient(owner, repo) {
                             }
                             break;
                         default:
-                            logger.warn('Status code: ' + status + ', response: ' + response);
+                            logger.warn('Create pull request - status code: ' + status + ', response: ' + response);
                     }
                 }
             );
@@ -121,7 +121,7 @@ function GitHubClient(owner, repo) {
                                     logger.info('Branch ' + head + ' deleted from GitHub');
                                     break;
                                 default:
-                                    logger.warn('Status code: ' + status + ', response: ' + response);
+                                    logger.warn('Delete branch if merged - status code: ' + status + ', response: ' + response);
                             }
                         }
                     );
@@ -157,12 +157,50 @@ function GitHubClient(owner, repo) {
                 function(status, response) {
                     //TODO make error more generic!
                     if (status == 404){
-                        logger.warn('Status: ' + status + ', message: ' + response.message);
+                        logger.warn('Is branch merged - status: ' + status + ', message: ' + response.message);
                     } else {
                         isMerged = response['ahead_by'] === 0 && response['total_commits'] === 0;
                         callback(isMerged);
                     }
-            });
+                }
+            );
+        },
+
+        /**
+         * merge branch and use callback to propagate results
+         *
+         * @param {string} base: the base branch to merge into
+         * @param {string} head: the head to merge (can be sha1 or branch name)
+         * @param {string} commit: (optional) commit message to be used
+         * @param {function} callback function
+         */
+        mergeBranch: function(base, head, commit, callback) {
+            var commit = commit ? commit : 'Merge ' + head + ' into ' + base;
+
+            var data = {
+                base: base,
+                head: head,
+                commit: commit
+            };
+
+            self.call(
+                'POST',
+                '/repos/' + self.owner + '/' + self.repo + '/merges',
+                data,
+                function(status, response) {
+                    switch(status) {
+                        case 201:
+                            logger.info('Merged branch ' + head + ' into ' + base);
+                            break;
+                        case 409:
+                            logger.error('Merge conflict, merging ' + head + ' into ' + base);
+                            // TODO do something with the callback, e.g. inform JIRA
+                            break;
+                        default:
+                            logger.warn('Status code: ' + status + ', response: ' + response);
+                    }
+                }
+            );
         },
 
         /**

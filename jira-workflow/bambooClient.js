@@ -51,9 +51,9 @@ function BambooClient() {
             logger.info('Trigger received for Bamboo project ' + plan + ' for default branch and with custom variable ' + variable);
             // queue build with default branch and pass custom variable as data
             var planBuildUrl = '/rest/api/latest/queue/' + plan + '.json';
-            var postData = {};
-            postData['bamboo.variable.userstory'] = variable;
+            var payload = {'bamboo.variable.userstory': variable};
 
+            var postData = require('qs').stringify(payload)
             // Queue build
             self.call('POST', planBuildUrl, postData, function (status, response) {
                 switch (status) {
@@ -204,6 +204,7 @@ function BambooClient() {
                 logger.debug('Outgoing Request - Bamboo');
                 logger.debug('URL: ' + options.path);
                 logger.debug('Method: ' + options.method);
+                logger.debug('Body:' + body);
 
                 var response = '';
 

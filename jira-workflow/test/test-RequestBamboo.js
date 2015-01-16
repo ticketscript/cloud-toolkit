@@ -128,7 +128,7 @@ exports['testReleaseTestProject'] = function (test) {
     test.expect(1);
 
     // Mock Bamboo interaction (cannot match post data as of now)
-    bambooMock.post(Config.atlassian.pathPrefix + '/rest/api/latest/queue/' + testProject +'.json')
+    bambooMock.post(Config.atlassian.pathPrefix + '/rest/api/latest/queue/' + testProject +'.json', 'bamboo.variable.userstory=TST-00')
       .reply(200);
 
     bambooHandler.handleAction({

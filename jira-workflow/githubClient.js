@@ -57,7 +57,7 @@ function GitHubClient(owner, repo) {
                                     logger.info(response.ref + ' created in GitHub');
                                     break;
                                 default:
-                                    logger.warn('Status code: ' + status + ', message: ' + response);
+                                    logger.warn('Create branch - status code: ' + status + ', message: ' + response);
                             }
                         }
                     );
@@ -96,7 +96,7 @@ function GitHubClient(owner, repo) {
                             }
                             break;
                         default:
-                            logger.warn('Status code: ' + status + ', response: ' + response);
+                            logger.warn('Create pull request - status code: ' + status + ', response: ' + response);
                     }
                 }
             );
@@ -121,7 +121,7 @@ function GitHubClient(owner, repo) {
                                     logger.info('Branch ' + head + ' deleted from GitHub');
                                     break;
                                 default:
-                                    logger.warn('Status code: ' + status + ', response: ' + response);
+                                    logger.warn('Delete branch if merged - status code: ' + status + ', response: ' + response);
                             }
                         }
                     );
@@ -157,7 +157,7 @@ function GitHubClient(owner, repo) {
                 function(status, response) {
                     //TODO make error more generic!
                     if (status == 404){
-                        logger.warn('Status: ' + status + ', message: ' + response.message);
+                        logger.warn('Is branch merged - status: ' + status + ', message: ' + response.message);
                     } else {
                         isMerged = response['ahead_by'] === 0 && response['total_commits'] === 0;
                         callback(isMerged);

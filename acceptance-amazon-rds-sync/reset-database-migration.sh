@@ -26,4 +26,4 @@ mkdir $DATABASE_MIGRATION_TARGET_DIR
 cp $DATABASE_MIGRATION_SOURCE_DIR/*.sql $DATABASE_MIGRATION_TARGET_DIR/
 
 # Reset Git working folder to previous branch
-cd $DATABASE_MIGRATION_SOURCE_DIR && git checkout -q - && git stash pop
+cd $DATABASE_MIGRATION_SOURCE_DIR && git checkout -q - && git stash show && git stash pop

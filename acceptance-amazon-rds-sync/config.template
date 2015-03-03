@@ -7,7 +7,6 @@ INSTANCE_VPC_SECURITY_GROUPS=""
 INSTANCE_AVAILABILITY_ZONE=""
 
 # Managed Amazon RDS instance source snapshot
-SNAPSHOT=""
 SNAPSHOT_INSTANCE=""
 
 # Managed Amazon RDS database

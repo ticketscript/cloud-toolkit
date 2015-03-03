@@ -7,10 +7,30 @@ REGEX_PROGRESS="<PercentProgress>([0-9]+)</PercentProgress>"
 REGEX_INSTANCE_PARAMGROUP="<DBParameterGroupName>(.*)</DBParameterGroupName>"
 REGEX_PARAMETER_STATUS="<ParameterApplyStatus>(.*)</ParameterApplyStatus>"
 REGEX_DATE="<SnapshotCreateTime>(.*?)T(.*?)Z</SnapshotCreateTime>"
+REGEX_SNAPSHOT_CREATION_DATE="^rds:dbs3\-([[:digit:]\-]{10})"
 
 #
 # Common RDS functions
 #
+rds_get_latest_snapshot() {
+	SNAPSHOTS=$(rds-describe-db-snapshots -i "$SNAPSHOT_INSTANCE");
+	current_date=$(date +%Y-%m-%d);
+
+	while read -r line; do
+		stringarray=($line);
+		snapshot_name=${stringarray[1]};
+	  # automatic backups named as rds:dbs3-2015-03-02-01-11
+	  if [[ "${snapshot_name}" =~ $REGEX_SNAPSHOT_CREATION_DATE ]]; then
+	  	creation_date=$(date -d ${BASH_REMATCH[1]} +%Y-%m-%d)
+	  	[[ $current_date == $creation_date ]] && latest_snapshot=$snapshot_name; 
+	  fi
+	done <<< "$SNAPSHOTS"
+
+	if [[ -z $latest_snapshot ]]; then
+		echo 'Could not find the latest automatic backup'
+		exit 1
+	fi
+}
 
 rds_get_instance_status() {
 

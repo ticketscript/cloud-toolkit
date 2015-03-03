@@ -1,32 +1,31 @@
 # Amazon RDS sync tool
 ```
 Descrition: Ticketscript Acceptence environment builder
-License:    
+License:
 Author:     Jay <geoffrey.dekleijn@ticketscript.nl>
 ```
 
 ## Description ##
 
-Synchronization toolkit for Amazon RDS Database instances. The synchronization will be from the an RDS SNAPSHOT  to a new
+Synchronization toolkit for Amazon RDS Database instances. The synchronization will be from the latest an RDS SNAPSHOT  to a new
 RDS database INSTANCE. Typically, these scripts are used to 'clone' a database from the production environment to an acceptance
 environment on a nightly basis.
 
 These scripts will take care of the following:
 
-1. Taking a snapshot from the SNAPSHOT instance
-2. Backing up any user-generated data on the target INSTANCE
-3. Destroy the INSTANCE
-4. Create a new target INSTANCE from the SNAPSHOT
-5. Restore any user-generated data to the target INSTANCE
+1. Backing up any user-generated data on the target INSTANCE
+2. Destroy the INSTANCE
+3. Create a new target INSTANCE from the latest automatic snapshot available
+4. Restore any user-generated data to the target INSTANCE
 
 The ability of separating user-generate data from imported data is achieved by bumping all primary keys half way through the
 key space. By default, all primary keys are bumped to 1,000,000,000 (1/4 of 32 bit key space). Though this is a crude mechanism,
-it will allow for easy backup and restore. 
+it will allow for easy backup and restore.
 
 ### Configuration
 Copy the 'config.template' file to 'config' and setup the INSTANCE variable. The INSTANCE refers
 to the Amazon RDS instance that will be created. Any DATABASE variabels refer to the database on the RDS instance
-that will be synchronized. The SNAPSHOT and SNAPSHOT_INSTANCE variables refer to the RDS source instance. 
+that will be synchronized. The SNAPSHOT_INSTANCE variable refers to the RDS source instance.
 
 Copy 'post-migration-tweaks.sql.template' to 'post-migration-tweaks.sql', and add any post migration SQL statements that
 may be required.
@@ -39,7 +38,7 @@ Runs the full backup-snapshot-destroy-create-restore process for the target INST
 
 [restore-db-from-slave.sh](restore-db-from-slave.sh) <INSTANCE>
 
-Creates the target INSTANCE from the specified SNAPSHOT 
+Creates the target INSTANCE from the latest available snapshot created by automated backups
 
 ## Requirements ##
 

@@ -22,9 +22,6 @@ case "$instance_status" in
 
 	"available")
 
-		# Backup user data in target database first
-		./backup-user-data.sh $DATABASE_NAME $DATABASE_HOST $DATABASE_OFFSET 1>$DATABASE_USERDATA_SQL_FILE
-
 		rds-delete-db-instance -f --skip-final-snapshot --db-instance-identifier $INSTANCE
 		rds_get_instance_status
 		;;

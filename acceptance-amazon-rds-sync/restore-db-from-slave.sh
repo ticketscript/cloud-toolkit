@@ -8,7 +8,6 @@ DIR=$(dirname "$0")
 source $DIR/config
 source $DIR/rds-common
 
-
 #
 # Create database instance
 #
@@ -21,16 +20,13 @@ echo -n "Instance $INSTANCE status: $instance_status"
 case "$instance_status" in
 
 	"DBInstanceNotFound")
+		rds_get_latest_snapshot
 
-		echo
-		echo "Creating new instance from $SNAPSHOT snapshot"
-
-		# Create snapshot
-		do_create_snapshot
+		echo -n "Creating instance $INSTANCE from snapshot $latest_snapshot"
 
 		# Restore target database from snapshot
 		rds-restore-db-instance-from-db-snapshot \
-		  --db-snapshot-identifier "$SNAPSHOT" \
+		  --db-snapshot-identifier "$latest_snapshot" \
 		  --db-instance-identifier "$INSTANCE" \
 		  --db-instance-class "$INSTANCE_CLASS" \
 		  --db-subnet-group-name "$INSTANCE_SUBNET_GROUP" \
@@ -74,6 +70,7 @@ if [ "$instance_paramgroup" != "$INSTANCE_PARAM_GROUP" ]; then
 	  --db-instance-identifier "$INSTANCE" \
 	  --db-parameter-group-name "$INSTANCE_PARAM_GROUP" \
 	  --vpc-security-group-ids "$INSTANCE_VPC_SECURITY_GROUPS" \
+	  --backup-retention-period 0 \
 	  --apply-immediately
 
 	# Wait for modifications to complete

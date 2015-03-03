@@ -22,11 +22,11 @@ case "$instance_status" in
 		;;
 
 	"available")
-	
+
 		# Backup user data in target database first
 		./backup-user-data.sh $DATABASE_NAME $DATABASE_HOST $DATABASE_OFFSET 1>$DATABASE_USERDATA_SQL_FILE
 
-		if [ "$?" -gt 0 ]; then 
+		if [ "$?" -gt 0 ]; then
 			echo "ERROR - Backup user data failed!" >&2
 			exit 1
 		fi
@@ -68,7 +68,7 @@ esac
 # Restore target database from snapshot
 ./restore-db-from-slave.sh $INSTANCE
 
-if [ "$?" -gt 0 ]; then 
+if [ "$?" -gt 0 ]; then
 	echo "ERROR - Restoring database instance from slave failed!" >&2
 	exit 1
 fi

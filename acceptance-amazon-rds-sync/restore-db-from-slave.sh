@@ -22,6 +22,8 @@ case "$instance_status" in
 	"DBInstanceNotFound")
 		rds_get_latest_snapshot
 
+		echo -n "Creating instance $INSTANCE from snapshot $latest_snapshot"
+
 		# Restore target database from snapshot
 		rds-restore-db-instance-from-db-snapshot \
 		  --db-snapshot-identifier "$latest_snapshot" \

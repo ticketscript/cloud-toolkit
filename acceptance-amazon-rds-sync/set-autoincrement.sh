@@ -17,12 +17,12 @@ if [ "$HOST" == "" ]; then
   do_usage
   exit 1
 fi
- 
+
 if [ "$ID" == "" ]; then
   do_usage
   exit 1
 fi
- 
-while read table key ; do 
+
+while read table key ; do
   echo "ALTER TABLE $table AUTO_INCREMENT=$ID;"
 done < table-list | mysql -h $HOST $DATABASE

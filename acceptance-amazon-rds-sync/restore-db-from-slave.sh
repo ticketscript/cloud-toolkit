@@ -68,6 +68,7 @@ if [ "$instance_paramgroup" != "$INSTANCE_PARAM_GROUP" ]; then
 	  --db-instance-identifier "$INSTANCE" \
 	  --db-parameter-group-name "$INSTANCE_PARAM_GROUP" \
 	  --vpc-security-group-ids "$INSTANCE_VPC_SECURITY_GROUPS" \
+	  --backup-retention-perion 0 \
 	  --apply-immediately
 
 	# Wait for modifications to complete

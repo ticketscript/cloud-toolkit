@@ -12,7 +12,7 @@ source $DIR/config
 # skip old-style migrations if source and target directories are not present
 if [ -d "$DATABASE_MIGRATION_SOURCE_DIR" -a -d "$DATABASE_MIGRATION_TARGET_DIR" ]; then
   # Reset 'migration' folder to origin/master
-  cd $DATABASE_MIGRATION_SOURCE_DIR ; git stash clear && git stash save ; git fetch -q origin && git checkout -q origin/master
+  cd $DATABASE_MIGRATION_SOURCE_DIR ; git stash clear && git stash save ; git fetch -q origin && git checkout -q master
 
   # Split file names on newline
   IFS=$'\n'

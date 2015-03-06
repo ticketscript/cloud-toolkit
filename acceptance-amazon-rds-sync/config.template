@@ -17,3 +17,7 @@ DATABASE_USERDATA_SQL_FILE="temp.sql"
 
 DATABASE_MIGRATION_SOURCE_DIR=""
 DATABASE_MIGRATION_TARGET_DIR="$HOME/sql-processed"
+
+# Migration tool
+MIGRATE_ENV="" # e.g. acceptance_baratheon
+MIGRATE_BIN="" # path to migrate script

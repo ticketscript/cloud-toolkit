@@ -20,7 +20,7 @@ rds_get_latest_snapshot() {
 		snapshot_name=${stringarray[1]};
 
     # automatic backups named as rds:dbs3-2015-03-02-01-11
-    REGEX="rds:dbs3-[0-9]{4}-[0-9]{2}-[0-9]{2}"
+    REGEX="dbs3-[0-9]{4}-[0-9]{2}-[0-9]{2}"
     if ! [[ "$snapshot_name" =~ $REGEX ]]; then
     	echo
     	echo "No automatic backup, $snapshot_name"

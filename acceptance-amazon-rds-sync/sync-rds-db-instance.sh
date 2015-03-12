@@ -7,10 +7,6 @@ DIR=$(dirname "$0")
 source $DIR/config
 source $DIR/rds-common
 
-# Wait for snapshot
-echo "Waiting for snapshot "
-rds_snapshot_wait
-
 # Fetch instance status
 rds_get_instance_status
 

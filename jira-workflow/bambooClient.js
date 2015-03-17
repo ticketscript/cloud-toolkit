@@ -115,6 +115,12 @@ function BambooClient() {
          * @param {string} branch: branch name that we're looking for
          */
         findBranch: function(response, branch) {
+            if (!response['branches']) {
+                logger.error('findBranch: Invalid response for branch ' + branch);
+                logger.error(response);
+                return null;
+            }
+
             for (var id in response['branches']['branch']) {
                 var buildPlanBranch = response['branches']['branch'][id];
 

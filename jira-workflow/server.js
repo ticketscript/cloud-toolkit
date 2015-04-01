@@ -21,7 +21,7 @@ var handler = new RequestHandler();
 // Init Express and request body parser
 var app = express();
 
-app.use(bodyParser.json(),function(req, res, next) {
+app.use(bodyParser.json({limit: '50mb'}),function(req, res, next) {
 	logger.debug('Incoming request');
 	logger.debug('Method:', req.method);
   	logger.debug('URL:', req.originalUrl);
@@ -29,7 +29,7 @@ app.use(bodyParser.json(),function(req, res, next) {
   	logger.debug('Body: ', req.body);
   	next();
 });
-
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 // Bamboo routes
 app.route('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project').post(handler.handleRequest);
 app.route('/jira/:issueKey/:type(bamboo)/:action(trigger)/:project/:stage').post(handler.handleRequest);

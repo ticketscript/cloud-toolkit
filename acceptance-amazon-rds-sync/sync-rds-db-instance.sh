@@ -81,5 +81,8 @@ mysql -h $DATABASE_HOST $DATABASE_NAME < $DIR/post-migration-tweaks.sql 1>/dev/n
 # Restore user data in target database
 mysql -h $DATABASE_HOST $DATABASE_NAME <$DATABASE_USERDATA_SQL_FILE 1>/dev/null
 
+# Restore data of saved field values
+./import-table-fields.sh
+
 # Clean exit!
 exit 0

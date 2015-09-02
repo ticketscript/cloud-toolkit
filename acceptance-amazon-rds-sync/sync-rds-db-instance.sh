@@ -19,14 +19,6 @@ case "$instance_status" in
 
 	"available")
 
-		# Backup user data in target database first
-		./backup-user-data.sh $DATABASE_NAME $DATABASE_HOST $DATABASE_OFFSET 1>$DATABASE_USERDATA_SQL_FILE
-
-		if [ "$?" -gt 0 ]; then
-			echo "ERROR - Backup user data failed!" >&2
-			exit 1
-		fi
-
 		# Destroy target database
 		./destroy-db-instance.sh  $INSTANCE
 

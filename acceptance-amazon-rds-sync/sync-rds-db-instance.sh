@@ -71,7 +71,11 @@ mysql -h $DATABASE_HOST $DATABASE_NAME < $DIR/post-migration-tweaks.sql 1>/dev/n
 ./execute-migration.sh
 
 # Restore user data in target database
-mysql -h $DATABASE_HOST $DATABASE_NAME <$DATABASE_USERDATA_SQL_FILE 1>/dev/null
+if [ $NO_USER_DATA ]; then
+  echo 'Skip recovery of user data';
+else
+  mysql -h $DATABASE_HOST $DATABASE_NAME <$DATABASE_USERDATA_SQL_FILE 1>/dev/null
+fi
 
 # Restore data of saved field values
 ./import-table-fields.sh

@@ -8,7 +8,6 @@ DIR=$(dirname "$0")
 source $DIR/config
 source $DIR/rds-common
 
-
 #
 # Create database instance
 #
@@ -23,11 +22,15 @@ case "$instance_status" in
   "available")
 
     # Backup user data in target database first
-    ./backup-user-data.sh $DATABASE_NAME $DATABASE_HOST $DATABASE_OFFSET 1>$DATABASE_USERDATA_SQL_FILE
+    if [ $NO_USER_DATA ]; then
+      echo 'Skip saving user data';
+    else
+      ./backup-user-data.sh $DATABASE_NAME $DATABASE_HOST $DATABASE_OFFSET 1>$DATABASE_USERDATA_SQL_FILE
 
-    if [ "$?" -gt 0 ]; then
-      echo "ERROR - Backup user data failed!" >&2
-      exit 1
+      if [ "$?" -gt 0 ]; then
+        echo "ERROR - Backup user data failed!" >&2
+        exit 1
+      fi
     fi
 
     rds-delete-db-instance -f --skip-final-snapshot --db-instance-identifier $INSTANCE

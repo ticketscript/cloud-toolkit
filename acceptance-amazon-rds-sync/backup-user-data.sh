@@ -5,5 +5,5 @@ OFFSET="$3"
 
 while read table key ; do
   mysqldump -h $HOST --compact --skip-lock-tables --no-create-db \
-            -c --no-create-info --where="$key >= $OFFSET" $DATABASE $table
+            -c --no-create-info --insert-ignore --where="$key >= $OFFSET" $DATABASE $table
 done < table-list

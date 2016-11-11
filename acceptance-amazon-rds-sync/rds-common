@@ -134,4 +134,5 @@ rds_snapshot_wait() {
                 rds_get_snapshot_status
                 sleep 25
         done
+	echo
 }
